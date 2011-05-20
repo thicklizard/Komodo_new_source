@@ -1126,6 +1126,8 @@ static bool bio_attempt_front_merge(struct request_queue *q,
 				    struct request *req, struct bio *bio)
 {
 	const int ff = bio->bi_rw & REQ_FAILFAST_MASK;
+	sector_t sector;
+
 
 	if (!ll_front_merge_fn(q, req, bio))
 		return false;
