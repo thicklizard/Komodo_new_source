@@ -692,6 +692,7 @@ int scsi_cmd_ioctl(struct request_queue *q, struct gendisk *bd_disk, fmode_t mod
 }
 EXPORT_SYMBOL(scsi_cmd_ioctl);
 
+
 int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 {
 	if (bd && bd == bd->bd_contains)
@@ -742,6 +743,9 @@ int scsi_cmd_blk_ioctl(struct block_device *bd, fmode_t mode,
 	if (ret < 0)
 		return ret;
 
+int scsi_cmd_blk_ioctl(struct block_device *bd, fmode_t mode,
+		       unsigned int cmd, void __user *arg)
+{
 	return scsi_cmd_ioctl(bd->bd_disk->queue, bd->bd_disk, mode, cmd, arg);
 }
 EXPORT_SYMBOL(scsi_cmd_blk_ioctl);
