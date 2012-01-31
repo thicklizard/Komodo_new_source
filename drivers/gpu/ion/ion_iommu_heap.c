@@ -187,28 +187,11 @@ int ion_iommu_heap_map_iommu(struct ion_buffer *buffer,
 					unsigned long flags)
 {
 	struct iommu_domain *domain;
-<<<<<<< HEAD
-<<<<<<< HEAD
-	struct ion_iommu_priv_data *buffer_data = buffer->priv_virt;
-	int i, j, ret = 0;
-	unsigned long extra;
-=======
 	int ret = 0;
 	unsigned long extra;
 	struct ion_iommu_priv_data *buffer_data = buffer->priv_virt;
 	int prot = IOMMU_WRITE | IOMMU_READ;
 	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
->>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
-=======
-	int ret = 0;
-	unsigned long extra;
-	struct ion_iommu_priv_data *buffer_data = buffer->priv_virt;
-<<<<<<< HEAD
->>>>>>> 73c17ee... gpu: ion: Map a range into the IOMMU
-=======
-	int prot = IOMMU_WRITE | IOMMU_READ;
-	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
->>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
 
 	BUG_ON(!msm_use_iommu());
 
@@ -371,3 +354,4 @@ void ion_iommu_heap_destroy(struct ion_heap *heap)
 	kfree(iommu_heap);
 	iommu_heap = NULL;
 }
+
