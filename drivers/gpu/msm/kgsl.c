@@ -448,6 +448,7 @@ void kgsl_timestamp_expired(struct work_struct *work)
 		kfree(event);
 	}
 
+<<<<<<< HEAD
 	/* Send the next pending event for each context to the device */
 	if (device->ftbl->next_event) {
 		unsigned int id = KGSL_MEMSTORE_GLOBAL;
@@ -464,6 +465,8 @@ void kgsl_timestamp_expired(struct work_struct *work)
 		}
 	}
 
+=======
+>>>>>>> c55448d... msm: kgsl: Remove last_expired_ctxt_id
 	mutex_unlock(&device->mutex);
 }
 EXPORT_SYMBOL(kgsl_timestamp_expired);
