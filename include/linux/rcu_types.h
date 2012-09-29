@@ -9,10 +9,12 @@
  * @func: actual update function to call after the grace period.
  */
 struct rcu_head {
-        struct rcu_head *next;
-        void (*func)(struct rcu_head *head);
+	struct rcu_head *next;
+	void (*func)(struct rcu_head *head);
+
 };
 
 #endif
 
 #endif
+
