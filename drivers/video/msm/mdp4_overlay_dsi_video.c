@@ -574,7 +574,7 @@ static void mdp4_overlay_dsi_video_wait4event(struct msm_fb_data_type *mfd,
 	outp32(MDP_INTR_ENABLE, mdp_intr_mask);
 	mdp_enable_irq(MDP_DMA2_TERM);  /* enable intr */
 	spin_unlock_irqrestore(&mdp_spin_lock, flag);
-	wait_for_completion_timeout(&dsi_video_comp, HZ/10);
+	wait_for_completion(&dsi_video_comp);
 	mdp_disable_irq(MDP_DMA2_TERM);
 }
 
