@@ -607,39 +607,39 @@ check_range(struct mm_struct *mm, unsigned long start, unsigned long end,
 }
 
 /*
-* Apply policy to a single VMA
-* This must be called with the mmap_sem held for writing.
-*/
+ * Apply policy to a single VMA
+ * This must be called with the mmap_sem held for writing.
+ */
 static int vma_replace_policy(struct vm_area_struct *vma,
-struct mempolicy *pol)
+						struct mempolicy *pol)
 {
-int err;
-struct mempolicy *old;
-struct mempolicy *new;
+	int err;
+	struct mempolicy *old;
+	struct mempolicy *new;
 
-pr_debug("vma %lx-%lx/%lx vm_ops %p vm_file %p set_policy %p\n",
-vma->vm_start, vma->vm_end, vma->vm_pgoff,
-vma->vm_ops, vma->vm_file,
-vma->vm_ops ? vma->vm_ops->set_policy : NULL);
+	pr_debug("vma %lx-%lx/%lx vm_ops %p vm_file %p set_policy %p\n",
+		 vma->vm_start, vma->vm_end, vma->vm_pgoff,
+		 vma->vm_ops, vma->vm_file,
+		 vma->vm_ops ? vma->vm_ops->set_policy : NULL);
 
-new = mpol_dup(pol);
-if (IS_ERR(new))
-return PTR_ERR(new);
+	new = mpol_dup(pol);
+	if (IS_ERR(new))
+		return PTR_ERR(new);
 
-if (vma->vm_ops && vma->vm_ops->set_policy) {
-err = vma->vm_ops->set_policy(vma, new);
-if (err)
-goto err_out;
-}
+	if (vma->vm_ops && vma->vm_ops->set_policy) {
+		err = vma->vm_ops->set_policy(vma, new);
+		if (err)
+			goto err_out;
+	}
 
-old = vma->vm_policy;
-vma->vm_policy = new; /* protected by mmap_sem */
-mpol_put(old);
+	old = vma->vm_policy;
+	vma->vm_policy = new; /* protected by mmap_sem */
+	mpol_put(old);
 
-return 0;
+	return 0;
  err_out:
-mpol_put(new);
-return err;
+	mpol_put(new);
+	return err;
 }
 
 /* Step 2: apply policy to a range and do splits. */
@@ -681,11 +681,9 @@ static int mbind_range(struct mm_struct *mm, unsigned long start,
 			if (err)
 				goto out;
 		}
-
 		err = vma_replace_policy(vma, new_pol);
-		 if (err)
+		if (err)
 			goto out;
-		}
 	}
 
  out:
@@ -1515,14 +1513,16 @@ struct mempolicy *get_vma_policy(struct task_struct *task,
 				pol = vpol;
 		} else if (vma->vm_policy) {
 			pol = vma->vm_policy;
-		/*
-		* shmem_alloc_page() passes MPOL_F_SHARED policy with
-		* a pseudo vma whose vma->vm_ops=NULL. Take a reference
-		* count on these policies which will be dropped by
-		* mpol_cond_put() later
-		*/
-		if (mpol_needs_cond_ref(pol))
-		mpol_get(pol);
+
+			/*
+			 * shmem_alloc_page() passes MPOL_F_SHARED policy with
+			 * a pseudo vma whose vma->vm_ops=NULL. Take a reference
+			 * count on these policies which will be dropped by
+			 * mpol_cond_put() later
+			 */
+			if (mpol_needs_cond_ref(pol))
+				mpol_get(pol);
+		}
 	}
 	if (!pol)
 		pol = &default_policy;
@@ -2127,15 +2127,18 @@ static struct sp_node *sp_alloc(unsigned long start, unsigned long end,
 	n = kmem_cache_alloc(sn_cache, GFP_KERNEL);
 	if (!n)
 		return NULL;
+
 	newpol = mpol_dup(pol);
-if (IS_ERR(newpol)) {
-kmem_cache_free(sn_cache, n);
-return NULL;
-}
-newpol->flags |= MPOL_F_SHARED;
+	if (IS_ERR(newpol)) {
+		kmem_cache_free(sn_cache, n);
+		return NULL;
+	}
+	newpol->flags |= MPOL_F_SHARED;
+
 	n->start = start;
 	n->end = end;
 	n->policy = newpol;
+
 	return n;
 }
 
@@ -2146,7 +2149,7 @@ static int shared_policy_replace(struct shared_policy *sp, unsigned long start,
 	struct sp_node *n;
 	int ret = 0;
 
-mutex_lock(&sp->mutex);
+	mutex_lock(&sp->mutex);
 	n = sp_lookup(sp, start, end);
 	/* Take care of old policies in the same range. */
 	while (n && n->start < end) {
@@ -2159,8 +2162,8 @@ mutex_lock(&sp->mutex);
 		} else {
 			/* Old policy spanning whole new range. */
 			if (n->end > end) {
-			 struct sp_node *new2;
-			new2 = sp_alloc(end, n->end, n->policy);
+				struct sp_node *new2;
+				new2 = sp_alloc(end, n->end, n->policy);
 				if (!new2) {
 					ret = -ENOMEM;
 					goto out;
@@ -2177,9 +2180,9 @@ mutex_lock(&sp->mutex);
 	}
 	if (new)
 		sp_insert(sp, new);
-	out:
-		mutex_unlock(&sp->mutex);
-		return ret;
+out:
+	mutex_unlock(&sp->mutex);
+	return ret;
 }
 
 /**
@@ -2270,7 +2273,7 @@ void mpol_free_shared_policy(struct shared_policy *p)
 		next = rb_next(&n->nd);
 		sp_delete(p, n);
 	}
-	 mutex_unlock(&p->mutex);
+	mutex_unlock(&p->mutex);
 }
 
 /* assumes fs == KERNEL_DS */

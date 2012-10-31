@@ -524,7 +524,7 @@ blk_init_allocated_queue(struct request_queue *q, request_fn_proc *rfn,
 	q->request_fn		= rfn;
 	q->prep_rq_fn		= NULL;
 	q->unprep_rq_fn		= NULL;
-	q->queue_flags    = QUEUE_FLAG_DEFAULT;
+	q->queue_flags		= QUEUE_FLAG_DEFAULT;
 
 	/* Override internal queue lock with supplied lock pointer */
 	if (lock)
@@ -1272,12 +1272,14 @@ get_rq:
 	 */
 	init_request_from_bio(req, bio);
 
-		if (test_bit(QUEUE_FLAG_SAME_COMP, &q->queue_flags) ||
-			bio_flagged(bio, BIO_CPU_AFFINE))
-			req->cpu = smp_processor_id();
+	if (test_bit(QUEUE_FLAG_SAME_COMP, &q->queue_flags) ||
+	    bio_flagged(bio, BIO_CPU_AFFINE)) {
+		req->cpu = blk_cpu_to_group(get_cpu());
+		put_cpu();
+	}
 
-		plug = current->plug;
-		if (plug) {
+	plug = current->plug;
+	if (plug) {
 		/*
 		 * If this is the first request added after a plug, fire
 		 * of a plug trace. If others have been added before, check

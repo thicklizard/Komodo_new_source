@@ -1155,7 +1155,9 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			if (bdev->bd_invalidated) {
 				if (!ret)
 					rescan_partitions(disk, bdev);
-							}
+				else if (ret == -ENOMEDIUM)
+					invalidate_partitions(disk, bdev);
+			}
 			if (ret)
 				goto out_clear;
 		} else {
@@ -1188,7 +1190,8 @@ static int __blkdev_get(struct block_device *bdev, fmode_t mode, int for_part)
 			if (bdev->bd_invalidated) {
 				if (!ret)
 					rescan_partitions(bdev->bd_disk, bdev);
-				
+				else if (ret == -ENOMEDIUM)
+					invalidate_partitions(bdev->bd_disk, bdev);
 			}
 			if (ret)
 				goto out_unlock_bdev;

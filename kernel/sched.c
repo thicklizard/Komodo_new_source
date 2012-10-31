@@ -309,7 +309,7 @@ struct task_group root_task_group;
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
 	struct load_weight load;
-	unsigned long nr_running, h_nr_running;
+	unsigned long nr_running;
 
 	u64 exec_clock;
 	u64 min_vruntime;
@@ -1194,17 +1194,6 @@ static void resched_cpu(int cpu)
 	raw_spin_unlock_irqrestore(&rq->lock, flags);
 }
 
-void force_cpu_resched(int cpu)
-{
-       struct rq *rq = cpu_rq(cpu);
-       unsigned long flags;
-
-       raw_spin_lock_irqsave(&rq->lock, flags);
-       resched_task(cpu_curr(cpu));
-       raw_spin_unlock_irqrestore(&rq->lock, flags);
-}
-
-
 #ifdef CONFIG_NO_HZ
 /*
  * In the semi idle case, use the nearest busy cpu for migrating timers
@@ -1316,12 +1305,6 @@ static void sched_rt_avg_update(struct rq *rq, u64 rt_delta)
 static void sched_avg_update(struct rq *rq)
 {
 }
-
-void force_cpu_resched(int cpu)
-{
-       set_need_resched();
-}
-
 #endif /* CONFIG_SMP */
 
 #if BITS_PER_LONG == 32
@@ -1583,6 +1566,38 @@ static unsigned long cpu_avg_load_per_task(int cpu)
 	return rq->avg_load_per_task;
 }
 
+#ifdef CONFIG_FAIR_GROUP_SCHED
+
+/*
+ * Compute the cpu's hierarchical load factor for each task group.
+ * This needs to be done in a top-down fashion because the load of a child
+ * group is a fraction of its parents load.
+ */
+static int tg_load_down(struct task_group *tg, void *data)
+{
+	unsigned long load;
+	long cpu = (long)data;
+
+	if (!tg->parent) {
+		load = cpu_rq(cpu)->load.weight;
+	} else {
+		load = tg->parent->cfs_rq[cpu]->h_load;
+		load *= tg->se[cpu]->load.weight;
+		load /= tg->parent->cfs_rq[cpu]->load.weight + 1;
+	}
+
+	tg->cfs_rq[cpu]->h_load = load;
+
+	return 0;
+}
+
+static void update_h_load(long cpu)
+{
+	walk_tg_tree(tg_load_down, tg_nop, (void *)cpu);
+}
+
+#endif
+
 #ifdef CONFIG_PREEMPT
 
 static void double_rq_lock(struct rq *rq1, struct rq *rq2);
@@ -1738,6 +1753,7 @@ static void double_rq_unlock(struct rq *rq1, struct rq *rq2)
 static void calc_load_account_idle(struct rq *this_rq);
 static void update_sysctl(void);
 static int get_update_sysctl_factor(void);
+static void update_cpu_load(struct rq *this_rq);
 
 static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 {
@@ -1812,6 +1828,7 @@ static void activate_task(struct rq *rq, struct task_struct *p, int flags)
 		rq->nr_uninterruptible--;
 
 	enqueue_task(rq, p, flags);
+	inc_nr_running(rq);
 }
 
 /*
@@ -1823,6 +1840,7 @@ static void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
 		rq->nr_uninterruptible++;
 
 	dequeue_task(rq, p, flags);
+	dec_nr_running(rq);
 }
 
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
@@ -2877,24 +2895,6 @@ void sched_fork(struct task_struct *p)
 	put_cpu();
 }
 
-#ifdef CONFIG_PREEMPT_COUNT_CPU
-
-/*
-* Fetch the preempt count of some cpu's current task. Must be called
-* with interrupts blocked. Stale return value.
-*
-* No locking needed as this always wins the race with context-switch-out
-* + task destruction, since that is so heavyweight. The smp_rmb() is
-* to protect the pointers in that race, not the data being pointed to
-* (which, being guaranteed stale, can stand a bit of fuzziness).
-*/
-int preempt_count_cpu(int cpu)
-{
-       smp_rmb(); /* stop data prefetch until program ctr gets here */
-       return task_thread_info(cpu_curr(cpu))->preempt_count;
-}
-#endif
-
 /*
  * wake_up_new_task - wake up a newly created task for the first time.
  *
@@ -3577,15 +3577,22 @@ decay_load_missed(unsigned long load, unsigned long missed_updates, int idx)
  * scheduler tick (TICK_NSEC). With tickless idle this will not be called
  * every tick. We fix it up based on jiffies.
  */
-static void __update_cpu_load(struct rq *this_rq, unsigned long this_load,
-	unsigned long pending_updates)
+static void update_cpu_load(struct rq *this_rq)
 {
-	
+	unsigned long this_load = this_rq->load.weight;
+	unsigned long curr_jiffies = jiffies;
+	unsigned long pending_updates;
 	int i, scale;
 
 	this_rq->nr_load_updates++;
 
-	
+	/* Avoid repeated calls on same jiffy, when moving in and out of idle */
+	if (curr_jiffies == this_rq->last_load_update_tick)
+		return;
+
+	pending_updates = curr_jiffies - this_rq->last_load_update_tick;
+	this_rq->last_load_update_tick = curr_jiffies;
+
 	/* Update our load: */
 	this_rq->cpu_load[0] = this_load; /* Fasttrack for idx 0 */
 	for (i = 1, scale = 2; i < CPU_LOAD_IDX_MAX; i++, scale += scale) {
@@ -3610,46 +3617,9 @@ static void __update_cpu_load(struct rq *this_rq, unsigned long this_load,
 	sched_avg_update(this_rq);
 }
 
-/*
-* Called from nohz_idle_balance() to update the load ratings before doing the
-* idle balance.
-*/
-	void update_idle_cpu_load(struct rq *this_rq)
-	{
-	unsigned long curr_jiffies = jiffies;
-	unsigned long load = this_rq->load.weight;
-	unsigned long pending_updates;
-
-/*
-* Bloody broken means of dealing with nohz, but better than nothing..
-* jiffies is updated by one cpu, another cpu can drift wrt the jiffy
-* update and see 0 difference the one time and 2 the next, even though
-* we ticked at roughtly the same rate.
-*
-* Hence we only use this from nohz_idle_balance() and skip this
-* nonsense when called from the scheduler_tick() since that's
-* guaranteed a stable rate.
-*/
-	if (load || curr_jiffies == this_rq->last_load_update_tick)
-		return;
-
-	pending_updates = curr_jiffies - this_rq->last_load_update_tick;
-	this_rq->last_load_update_tick = curr_jiffies;
-
-	__update_cpu_load(this_rq, load, pending_updates);
-}
-
-/*
-* Called from scheduler_tick()
-*/
-
 static void update_cpu_load_active(struct rq *this_rq)
 {
-	/*
-	* See the mess in update_idle_cpu_load().
-	*/
-	this_rq->last_load_update_tick = jiffies;
-	__update_cpu_load(this_rq, this_rq->load.weight, 1);
+	update_cpu_load(this_rq);
 
 	calc_load_account_active(this_rq);
 }
@@ -4133,7 +4103,7 @@ void __kprobes add_preempt_count(int val)
 	if (DEBUG_LOCKS_WARN_ON((preempt_count() < 0)))
 		return;
 #endif
-	__add_preempt_count(val);
+	preempt_count() += val;
 #ifdef CONFIG_DEBUG_PREEMPT
 	/*
 	 * Spinlock count overflowing soon?
@@ -4164,7 +4134,7 @@ void __kprobes sub_preempt_count(int val)
 
 	if (preempt_count() == val)
 		trace_preempt_on(CALLER_ADDR0, get_parent_ip(CALLER_ADDR1));
-	__sub_preempt_count(val);
+	preempt_count() -= val;
 }
 EXPORT_SYMBOL(sub_preempt_count);
 
@@ -4229,7 +4199,7 @@ pick_next_task(struct rq *rq)
 	 * Optimization: we know that if all tasks are in
 	 * the fair class we can call that function directly:
 	 */
-	if (likely(rq->nr_running == rq->cfs.h_nr_running)) {
+	if (likely(rq->nr_running == rq->cfs.nr_running)) {
 		p = fair_sched_class.pick_next_task(rq);
 		if (likely(p))
 			return p;
@@ -4305,9 +4275,6 @@ need_resched:
 	if (likely(prev != next)) {
 		rq->nr_switches++;
 		rq->curr = next;
-#ifdef CONFIG_PREEMPT_COUNT_CPU
-		smp_wmb();
-#endif
 		++*switch_count;
 
 		context_switch(rq, prev, next); /* unlocks the rq */
@@ -7440,27 +7407,17 @@ static void __sdt_free(const struct cpumask *cpu_map)
 	for (tl = sched_domain_topology; tl->init; tl++) {
 		struct sd_data *sdd = &tl->data;
 
-			for_each_cpu(j, cpu_map) {
-				struct sched_domain *sd;
-
-				if (sdd->sd) {
-					sd = *per_cpu_ptr(sdd->sd, j);
-					if (sd && (sd->flags & SD_OVERLAP))
-					free_sched_groups(sd->groups, 0);
-					kfree(*per_cpu_ptr(sdd->sd, j));
-			}
-
-			if (sdd->sg)
-				kfree(*per_cpu_ptr(sdd->sg, j));
-			if (sdd->sgp)
-				kfree(*per_cpu_ptr(sdd->sgp, j));
+		for_each_cpu(j, cpu_map) {
+			struct sched_domain *sd = *per_cpu_ptr(sdd->sd, j);
+			if (sd && (sd->flags & SD_OVERLAP))
+				free_sched_groups(sd->groups, 0);
+			kfree(*per_cpu_ptr(sdd->sd, j));
+			kfree(*per_cpu_ptr(sdd->sg, j));
+			kfree(*per_cpu_ptr(sdd->sgp, j));
 		}
 		free_percpu(sdd->sd);
-		sdd->sd = NULL;
 		free_percpu(sdd->sg);
-		sdd->sg = NULL;
 		free_percpu(sdd->sgp);
-		sdd->sgp = NULL;
 	}
 }
 
@@ -7839,7 +7796,7 @@ int __init sched_create_sysfs_power_savings_entries(struct sysdev_class *cls)
 }
 #endif /* CONFIG_SCHED_MC || CONFIG_SCHED_SMT */
 
-static int num_cpus_frozen;  /* used to mark begin/end of suspend/resume */
+static int num_cpus_frozen;	/* used to mark begin/end of suspend/resume */
 
 /*
  * Update cpusets according to cpu_active mask.  If cpusets are
@@ -7852,27 +7809,28 @@ static int num_cpus_frozen;  /* used to mark begin/end of suspend/resume */
 static int cpuset_cpu_active(struct notifier_block *nfb, unsigned long action,
 			     void *hcpu)
 {
-		switch (action) {
-		case CPU_ONLINE_FROZEN:
-		case CPU_DOWN_FAILED_FROZEN:
+	switch (action) {
+	case CPU_ONLINE_FROZEN:
+	case CPU_DOWN_FAILED_FROZEN:
 
-/*
-* num_cpus_frozen tracks how many CPUs are involved in suspend
-* resume sequence. As long as this is not the last online
-* operation in the resume sequence, just build a single sched
-* domain, ignoring cpusets.
-*/
+		/*
+		 * num_cpus_frozen tracks how many CPUs are involved in suspend
+		 * resume sequence. As long as this is not the last online
+		 * operation in the resume sequence, just build a single sched
+		 * domain, ignoring cpusets.
+		 */
 		num_cpus_frozen--;
 		if (likely(num_cpus_frozen)) {
-		partition_sched_domains(1, NULL, NULL);
-		break;
-}
+			partition_sched_domains(1, NULL, NULL);
+			break;
+		}
 
-/*
-* This is the last CPU online operation. So fall through and
-* restore the original sched domains by considering the
-* cpuset configurations.
-*/
+		/*
+		 * This is the last CPU online operation. So fall through and
+		 * restore the original sched domains by considering the
+		 * cpuset configurations.
+		 */
+
 	case CPU_ONLINE:
 	case CPU_DOWN_FAILED:
 		cpuset_update_active_cpus();
@@ -7880,7 +7838,7 @@ static int cpuset_cpu_active(struct notifier_block *nfb, unsigned long action,
 	default:
 		return NOTIFY_DONE;
 	}
-		return NOTIFY_OK;
+	return NOTIFY_OK;
 }
 
 static int cpuset_cpu_inactive(struct notifier_block *nfb, unsigned long action,
@@ -7889,15 +7847,15 @@ static int cpuset_cpu_inactive(struct notifier_block *nfb, unsigned long action,
 	switch (action) {
 	case CPU_DOWN_PREPARE:
 		cpuset_update_active_cpus();
-			break;
+		break;
 	case CPU_DOWN_PREPARE_FROZEN:
 		num_cpus_frozen++;
 		partition_sched_domains(1, NULL, NULL);
-	break;
+		break;
 	default:
 		return NOTIFY_DONE;
 	}
-		 return NOTIFY_OK;
+	return NOTIFY_OK;
 }
 
 static int update_runtime(struct notifier_block *nfb,
@@ -8413,9 +8371,6 @@ struct task_struct *curr_task(int cpu)
 void set_curr_task(int cpu, struct task_struct *p)
 {
 	cpu_curr(cpu) = p;
-#ifdef CONFIG_PREEMPT_COUNT_CPU
-	smp_wmb();
-#endif
 }
 
 #endif
@@ -8511,8 +8466,7 @@ static void free_rt_sched_group(struct task_group *tg)
 {
 	int i;
 
-	if (tg->rt_se)
-		destroy_rt_bandwidth(&tg->rt_bandwidth);
+	destroy_rt_bandwidth(&tg->rt_bandwidth);
 
 	for_each_possible_cpu(i) {
 		if (tg->rt_rq)
