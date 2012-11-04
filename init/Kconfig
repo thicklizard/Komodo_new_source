@@ -978,6 +978,12 @@ config CC_OPTIMIZE_FOR_SIZE
 
 	  If unsure, say Y.
 
+config CC_OPTIMIZE_FAST
+	bool "Use -Ofast"
+
+
+
+
 config SYSCTL
 	bool
 
