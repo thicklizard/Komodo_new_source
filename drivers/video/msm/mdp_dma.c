@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2012, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2008-2011, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -301,8 +301,11 @@ void	mdp3_dsi_cmd_dma_busy_wait(struct msm_fb_data_type *mfd)
 
 	spin_lock_irqsave(&mdp_spin_lock, flag);
 #ifdef DSI_CLK_CTRL
+
+	spin_lock_bh(&dsi_clk_lock);
 	if (mipi_dsi_clk_on == 0)
 		mipi_dsi_turn_on_clks();
+	spin_unlock_bh(&dsi_clk_lock);
 #endif
 
 	if (mfd->dma->busy == TRUE) {
@@ -478,20 +481,16 @@ static void mdp_dma2_update_sub(struct msm_fb_data_type *mfd)
 void mdp_dma2_update(struct msm_fb_data_type *mfd)
 #endif
 {
-	unsigned long flag;
-
 	down(&mfd->dma->mutex);
 	if ((mfd) && (!mfd->dma->busy) && (mfd->panel_power_on)) {
 		down(&mfd->sem);
 		mfd->ibuf_flushed = TRUE;
 		mdp_dma2_update_lcd(mfd);
 
-		spin_lock_irqsave(&mdp_spin_lock, flag);
 		mdp_enable_irq(MDP_DMA2_TERM);
 		mfd->dma->busy = TRUE;
 		INIT_COMPLETION(mfd->dma->comp);
 
-		spin_unlock_irqrestore(&mdp_spin_lock, flag);
 		/* schedule DMA to start */
 		mdp_dma_schedule(mfd, MDP_DMA2_TERM);
 		up(&mfd->sem);

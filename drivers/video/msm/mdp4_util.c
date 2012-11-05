@@ -314,6 +314,8 @@ void mdp4_hw_init(void)
 	clk_rate = mdp_get_core_clk();
 	mdp4_fetch_cfg(clk_rate);
 
+	mdp4_overlay_cfg_init();
+
 	/* Mark hardware as initialized. Only revisions > v2.1 have a register
 	 * for tracking core reset status. */
 	if (mdp_hw_revision > MDP4_REVISION_V2_1)
@@ -378,6 +380,7 @@ irqreturn_t mdp4_isr(int irq, void *ptr)
 	outpdw(MDP_INTR_CLEAR, isr);
 
 	if (isr & INTR_PRIMARY_INTF_UDERRUN) {
+		pr_debug("%s: UNDERRUN -- primary\n", __func__);
 		mdp4_stat.intr_underrun_p++;
 		/* When underun occurs mdp clear the histogram registers
 		that are set before in hw_init so restore them back so
@@ -395,8 +398,10 @@ irqreturn_t mdp4_isr(int irq, void *ptr)
 		}
 	}
 
-	if (isr & INTR_EXTERNAL_INTF_UDERRUN)
+	if (isr & INTR_EXTERNAL_INTF_UDERRUN) {
+		pr_debug("%s: UNDERRUN -- external\n", __func__);
 		mdp4_stat.intr_underrun_e++;
+	}
 
 	isr &= mask;
 
@@ -2596,14 +2601,14 @@ void mdp4_free_writeback_buf(struct msm_fb_data_type *mfd, u32 mix_num)
 			ion_unmap_iommu(mfd->iclient, buf->ihdl,
 				DISPLAY_DOMAIN, GEN_POOL);
 			ion_free(mfd->iclient, buf->ihdl);
-			pr_debug("%s:%d free writeback imem\n", __func__,
+			pr_info("%s:%d free writeback imem\n", __func__,
 				__LINE__);
 			buf->ihdl = NULL;
 		}
 	} else {
 		if (buf->phys_addr) {
 			free_contiguous_memory_by_paddr(buf->phys_addr);
-			pr_debug("%s:%d free writeback pmem\n", __func__,
+			pr_info("%s:%d free writeback pmem\n", __func__,
 				__LINE__);
 		}
 	}
@@ -2837,12 +2842,10 @@ int mdp4_pcc_cfg(struct mdp_pcc_cfg_data *cfg_ptr)
 
 	if (0x8 & cfg_ptr->ops)
 		outpdw(mdp_dma_op_mode,
-			((inpdw(mdp_dma_op_mode) & ~(0x1<<10)) |
-						((0x8 & cfg_ptr->ops)<<10)));
+			(inpdw(mdp_dma_op_mode)|((0x8&cfg_ptr->ops)<<10)));
 
 	outpdw(mdp_cfg_offset,
-			((inpdw(mdp_cfg_offset) & ~(0x1<<29)) |
-						((cfg_ptr->ops & 0x1)<<29)));
+			(inpdw(mdp_cfg_offset)|((cfg_ptr->ops&0x1)<<29)));
 
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_OFF, FALSE);
 
@@ -3029,9 +3032,8 @@ int mdp4_argc_cfg(struct mdp_pgc_lut_data *pgc_ptr)
 
 		if (!ret) {
 			mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_ON, FALSE);
-			outpdw(pgc_enable_offset, (inpdw(pgc_enable_offset) &
-							~(0x1<<lshift_bits)) |
-				((0x1 & pgc_ptr->flags) << lshift_bits));
+			outpdw(pgc_enable_offset, (inpdw(pgc_enable_offset) |
+				((0x1 & pgc_ptr->flags) << lshift_bits)));
 			mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_OFF,
 									FALSE);
 		}

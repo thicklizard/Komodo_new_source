@@ -188,9 +188,12 @@
 #define DEBUG01		0x05A4	/* LVDS Data */
 
 /* PWM */
-static u32 d2l_pwm_freq_hz = (3.921*1000);
+static u32 d2l_pwm_freq_hz = (66*1000);
 
+/* 1366x768 uses pwm at 66 KHZ */
+/* 1200x1920 uses pwm at 25 KHZ */
 #define PWM_FREQ_HZ	(d2l_pwm_freq_hz)
+#define PWM_LEVEL 15
 #define PWM_PERIOD_USEC (USEC_PER_SEC / PWM_FREQ_HZ)
 #define PWM_DUTY_LEVEL (PWM_PERIOD_USEC / PWM_LEVEL)
 
@@ -556,7 +559,10 @@ static int mipi_d2l_lcd_on(struct platform_device *pdev)
 	/* Set gpio#4=U/D=0, gpio#3=L/R=1 , gpio#2,1=CABC=0, gpio#0=NA. */
 	mipi_d2l_write_reg(mfd, GPIOO, d2l_gpio_out_val);
 
-	d2l_pwm_freq_hz = (3.921*1000);
+	if (mfd->panel_info.xres == 1366)
+		d2l_pwm_freq_hz = (66*1000);
+	else
+		d2l_pwm_freq_hz = (25*1000);
 
 	if (bl_level == 0)
 		bl_level = PWM_LEVEL * 2 / 3 ; /* Default ON value */
@@ -574,7 +580,8 @@ static int mipi_d2l_lcd_on(struct platform_device *pdev)
 	mipi_d2l_enable_3d(mfd, false, false);
 
 	/* Add I2C driver only after DSI-CLK is running */
-	i2c_add_driver(&d2l_i2c_slave_driver);
+	if (d2l_i2c_client == NULL)
+		i2c_add_driver(&d2l_i2c_slave_driver);
 
 	pr_info("%s.ret=%d.\n", __func__, ret);
 
@@ -988,6 +995,8 @@ static struct platform_driver d2l_driver = {
 static int mipi_d2l_init(void)
 {
 	pr_debug("%s.\n", __func__);
+
+	d2l_i2c_client = NULL;
 
 	return platform_driver_register(&d2l_driver);
 }

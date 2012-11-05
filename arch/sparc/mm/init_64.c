@@ -2117,9 +2117,9 @@ EXPORT_SYMBOL(_PAGE_CACHE);
 
 #ifdef CONFIG_SPARSEMEM_VMEMMAP
 unsigned long vmemmap_table[VMEMMAP_SIZE];
-static int __meminitdata node_start;
 
 static long __meminitdata addr_start, addr_end;
+static int __meminitdata node_start;
 
 int __meminit vmemmap_populate(struct page *start, unsigned long nr, int node)
 {
@@ -2151,28 +2151,28 @@ int __meminit vmemmap_populate(struct page *start, unsigned long nr, int node)
 
 			*vmem_pp = pte_base | __pa(block);
 
-			 /* check to see if we have contiguous blocks */
-			 if (addr_end != addr || node_start != node) {
-			       if (addr_start)
-				printk(KERN_DEBUG " [%lx-%lx] on node %d\n",
-				addr_start, addr_end-1, node_start);
-			        addr_start = addr;
-			       node_start = node;
-			       }
-				addr_end = addr + VMEMMAP_CHUNK;
+			/* check to see if we have contiguous blocks */
+			if (addr_end != addr || node_start != node) {
+				if (addr_start)
+					printk(KERN_DEBUG " [%lx-%lx] on node %d\n",
+					       addr_start, addr_end-1, node_start);
+				addr_start = addr;
+				node_start = node;
+			}
+			addr_end = addr + VMEMMAP_CHUNK;
 		}
 	}
 	return 0;
 }
 
 void __meminit vmemmap_populate_print_last(void)
-	{
+{
 	if (addr_start) {
-	printk(KERN_DEBUG " [%lx-%lx] on node %d\n",
-		addr_start, addr_end-1, node_start);
-	addr_start = 0;
-	addr_end = 0;
-	node_start = 0;
+		printk(KERN_DEBUG " [%lx-%lx] on node %d\n",
+		       addr_start, addr_end-1, node_start);
+		addr_start = 0;
+		addr_end = 0;
+		node_start = 0;
 	}
 }
 #endif /* CONFIG_SPARSEMEM_VMEMMAP */

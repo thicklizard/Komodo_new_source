@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2010-2011, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -983,7 +983,8 @@ static u32 ddl_set_enc_property(struct ddl_client_context *ddl,
 			DDLCLIENT_STATE_IS(ddl, DDL_CLIENT_OPEN)) {
 			encoder->slice_delivery_info.enable
 				= *(u32 *)property_value;
-			DDL_MSG_HIGH("set encoder->slice_delivery_mode = %u\n",
+			DDL_MSG_HIGH("set encoder->slice_delivery_mode"
+				"  = %u\n",
 				encoder->slice_delivery_info.enable);
 			output_buf_size =
 				encoder->client_output_buf_req.sz;
@@ -997,26 +998,8 @@ static u32 ddl_set_enc_property(struct ddl_client_context *ddl,
 			encoder->slice_delivery_info.num_slices =
 				num_slices;
 			if (num_slices <= DDL_MAX_NUM_BFRS_FOR_SLICE_BATCH) {
-				DDL_MSG_HIGH("%s: currently slice info "
-					"metadata is not supported when slice "
-					"delivery mode is enabled. hence "
-					"disabling slice info metadata.\n",
-					__func__);
-				slice_property_hdr.prop_id =
-					VCD_I_METADATA_ENABLE;
-				slice_property_hdr.sz =
-					sizeof(struct \
-					vcd_property_meta_data_enable);
-				ddl_get_metadata_params(ddl,
-						&slice_property_hdr,
-						&slice_meta_data);
-				slice_meta_data.meta_data_enable_flag
-					&= ~VCD_METADATA_ENC_SLICE;
-				ddl_set_metadata_params(ddl,
-						&slice_property_hdr,
-						&slice_meta_data);
-				encoder->client_output_buf_req.min_count =
-				((DDL_ENC_SLICE_BATCH_FACTOR * num_slices + 2)
+				encoder->client_output_buf_req.min_count
+				= ((DDL_ENC_SLICE_BATCH_FACTOR * num_slices + 2)
 				> DDL_MAX_BUFFER_COUNT)
 				? DDL_MAX_BUFFER_COUNT :
 				(DDL_ENC_SLICE_BATCH_FACTOR * num_slices + 2);
@@ -1033,6 +1016,18 @@ static u32 ddl_set_enc_property(struct ddl_client_context *ddl,
 				encoder->client_output_buf_req.min_count,
 				output_buf_size,
 				encoder->client_output_buf_req.sz);
+				slice_property_hdr.prop_id =
+					VCD_I_METADATA_ENABLE;
+				slice_property_hdr.sz =
+				sizeof(struct vcd_property_meta_data_enable);
+				ddl_get_metadata_params(ddl,
+						&slice_property_hdr,
+						&slice_meta_data);
+				slice_meta_data.meta_data_enable_flag
+					&= ~VCD_METADATA_ENC_SLICE;
+				ddl_set_metadata_params(ddl,
+						&slice_property_hdr,
+						&slice_meta_data);
 				vcd_status = VCD_S_SUCCESS;
 			}
 		}
@@ -1594,7 +1589,6 @@ static u32 ddl_set_enc_dynamic_property(struct ddl_client_context *ddl,
 			vcd_status = VCD_S_SUCCESS;
 		}
 	}
-	break;
 	case VCD_I_INTRA_REFRESH:
 	{
 		struct vcd_property_intra_refresh_mb_number
@@ -1860,7 +1854,7 @@ u32 ddl_set_default_decoder_buffer_req(struct ddl_decoder_data *decoder,
 		if (!decoder->cont_mode)
 			min_dpb = ddl_decoder_min_num_dpb(decoder);
 		else
-			min_dpb = res_trk_get_min_dpb_count();
+			min_dpb = 5;
 		frame_size = &decoder->client_frame_size;
 		output_buf_req = &decoder->client_output_buf_req;
 		input_buf_req = &decoder->client_input_buf_req;
@@ -1874,19 +1868,6 @@ u32 ddl_set_default_decoder_buffer_req(struct ddl_decoder_data *decoder,
 		input_buf_req = &decoder->actual_input_buf_req;
 		min_dpb = decoder->min_dpb_num;
 		y_cb_cr_size = decoder->y_cb_cr_size;
-		if ((decoder->buf_format.buffer_format ==
-			VCD_BUFFER_FORMAT_TILE_4x2) &&
-			(frame_size->height < MDP_MIN_TILE_HEIGHT)) {
-			frame_size->height = MDP_MIN_TILE_HEIGHT;
-			ddl_calculate_stride(frame_size,
-				!decoder->progressive_only);
-			y_cb_cr_size = ddl_get_yuv_buffer_size(
-				frame_size,
-				&decoder->buf_format,
-				(!decoder->progressive_only),
-				decoder->hdr.decoding, NULL);
-		} else
-			y_cb_cr_size = decoder->y_cb_cr_size;
 	}
 	memset(output_buf_req, 0,
 		sizeof(struct vcd_buffer_requirement));

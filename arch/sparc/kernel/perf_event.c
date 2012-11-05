@@ -517,8 +517,6 @@ static inline void sparc_pmu_enable_event(struct cpu_hw_events *cpuc, struct hw_
 
 	enc = perf_event_get_enc(cpuc->events[idx]);
 
-
-
 	val = cpuc->pcr;
 	val &= ~mask;
 	val |= event_encoding(enc, idx);
@@ -1404,7 +1402,6 @@ static void perf_callchain_user_32(struct perf_callchain_entry *entry,
 {
 	unsigned long ufp;
 
-
 	ufp = regs->u_regs[UREG_I6] & 0xffffffffUL;
 	do {
 		struct sparc_stackf32 *usf, sf;
@@ -1426,7 +1423,7 @@ perf_callchain_user(struct perf_callchain_entry *entry, struct pt_regs *regs)
 	perf_callchain_store(entry, regs->tpc);
 
 	if (!current->mm)
-	return;
+		return;
 
 	flushw_user();
 	if (test_thread_flag(TIF_32BIT))

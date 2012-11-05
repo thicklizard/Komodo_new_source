@@ -1455,10 +1455,10 @@ config ARCH_RANDOM
 	def_bool y
 	prompt "x86 architectural random number generator" if EXPERT
 	---help---
-	Enable the x86 architectural RDRAND instruction
-	(Intel Bull Mountain technology) to generate random numbers.
-	If supported, this is a high bandwidth, cryptographically
-	secure hardware random number generator.
+	  Enable the x86 architectural RDRAND instruction
+	  (Intel Bull Mountain technology) to generate random numbers.
+	  If supported, this is a high bandwidth, cryptographically
+	  secure hardware random number generator.
 
 config EFI
 	bool "EFI runtime service support"

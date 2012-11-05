@@ -85,6 +85,7 @@ struct mdp_table_entry {
 
 extern struct mdp_ccs mdp_ccs_yuv2rgb ;
 extern struct mdp_ccs mdp_ccs_rgb2yuv ;
+/* TODO: trigger this with an ifdef */
 extern unsigned char hdmi_prim_display;
 
 /*
@@ -222,6 +223,13 @@ struct mdp_dma_data {
 	struct semaphore mutex;
 	struct completion comp;
 	struct completion dmap_comp;
+};
+
+/* HTC addition */
+struct mdp_reg {
+	uint32_t reg;
+	uint32_t val;
+	uint32_t mask;
 };
 
 extern struct list_head mdp_hist_lut_list;
@@ -801,6 +809,7 @@ int mdp_histogram_block2mgmt(uint32_t block, struct mdp_hist_mgmt **mgmt);
 void mdp_histogram_handle_isr(struct mdp_hist_mgmt *mgmt);
 void __mdp_histogram_kickoff(struct mdp_hist_mgmt *mgmt);
 void __mdp_histogram_reset(struct mdp_hist_mgmt *mgmt);
+unsigned int mdp_check_suspended(void);
 void mdp_footswitch_ctrl(boolean on);
 
 #ifdef CONFIG_FB_MSM_MDP303
@@ -823,10 +832,15 @@ static inline int mdp4_overlay_dsi_state_get(void)
 }
 #endif
 
+void mdp_vid_quant_set(void);
 #ifndef CONFIG_FB_MSM_MDP40
-static inline void mdp_dsi_cmd_overlay_suspend(void)
+static inline void mdp_dsi_cmd_overlay_suspend(struct msm_fb_data_type *mfd)
 {
 	/* empty */
+}
+static inline void mdp4_iommu_detach(void)
+{
+    /* empty */
 }
 #endif
 
@@ -836,5 +850,4 @@ int mdp_ppp_v4l2_overlay_play(struct fb_info *info,
 	unsigned long srcp0_addr, unsigned long srcp0_size,
 	unsigned long srcp1_addr, unsigned long srcp1_size);
 
-void mdp_vid_quant_set(void);
 #endif /* MDP_H */

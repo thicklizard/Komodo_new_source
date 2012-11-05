@@ -95,6 +95,8 @@
 #include <mach/msm_rtb.h>
 #include <mach/msm_cache_dump.h>
 #include <mach/scm.h>
+#include <mach/iommu_domains.h>
+
 #include <linux/fmem.h>
 
 #include "timer.h"
@@ -312,7 +314,7 @@ void jet_lcd_id_power(int pull)
 
 #endif
 
-#define MSM_PMEM_ADSP_SIZE         0x6D00000
+#define MSM_PMEM_ADSP_SIZE         0x6D00000 /* Need to be multiple of 64K */
 #define MSM_PMEM_ADSP2_SIZE        0x730000
 #define MSM_PMEM_AUDIO_SIZE        0x2B4000
 #ifdef CONFIG_MSM_IOMMU
@@ -525,7 +527,9 @@ static int msm8960_paddr_to_memtype(unsigned int paddr)
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
-	.align = PAGE_SIZE,
+	.align = SZ_64K,
+	.iommu_map_all = 1,
+	.iommu_2x_map_domain = VIDEO_DOMAIN,
 };
 
 static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
@@ -780,7 +784,8 @@ static void __init jet_early_memory(void)
 static void __init jet_reserve(void)
 {
 	msm_reserve();
-	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size);
+	fmem_pdata.align = PAGE_SIZE;
+	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size, fmem_pdata.align);
 }
 static int msm8960_change_memory_power(u64 start, u64 size,
 	int change_type)
@@ -824,7 +829,6 @@ int set_two_phase_freq(int cpufreq);
 
 #define MDP_VSYNC_GPIO 0
 
-/* #define PANEL_NAME_MAX_LEN	30 */
 #define MIPI_CMD_NOVATEK_QHD_PANEL_NAME	"mipi_cmd_novatek_qhd"
 #define MIPI_VIDEO_NOVATEK_QHD_PANEL_NAME	"mipi_video_novatek_qhd"
 #define MIPI_VIDEO_TOSHIBA_WSVGA_PANEL_NAME	"mipi_video_toshiba_wsvga"
@@ -1602,7 +1606,7 @@ static struct camera_flash_info msm_camera_sensor_s5k3h2yx_flash_info = {
 
 static struct camera_flash_cfg msm_camera_sensor_s5k3h2yx_flash_cfg = {
 	.low_temp_limit		= 5,
-	.low_cap_limit		= 5,
+	.low_cap_limit		= 15,
 	.flash_info             = &msm_camera_sensor_s5k3h2yx_flash_info,
 };
 /* Andrew_Cheng linear led 20111205 ME */
@@ -5531,7 +5535,7 @@ static struct pm8xxx_led_configure pm8921_led_info[] = {
 		.duites_size 	= 2,
 		.duty_time_ms 	= 16,
 		.lut_flag 	= PM_PWM_LUT_RAMP_UP | PM_PWM_LUT_PAUSE_HI_EN,
-		.out_current    = 6,
+		.out_current    = 40,
 		.duties		= {0, 50, 100, 100, 50, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,

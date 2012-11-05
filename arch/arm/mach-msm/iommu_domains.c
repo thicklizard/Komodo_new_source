@@ -21,8 +21,8 @@
 #include <mach/iommu_domains.h>
 #include <mach/socinfo.h>
 
-/* dummy 4k for overmapping */
-char iommu_dummy[2*PAGE_SIZE-4];
+/* dummy 64K for overmapping */
+char iommu_dummy[2*SZ_64K-4];
 
 struct msm_iommu_domain {
 	/* iommu domain to map in */
@@ -66,12 +66,12 @@ struct {
 	},
 	/* Camera */
 	{
-		.name =	"ijpeg_src",
+		.name = "ijpeg_src",
 		.domain = CAMERA_DOMAIN,
 	},
 	/* Camera */
 	{
-		.name =	"ijpeg_dst",
+		.name = "ijpeg_dst",
 		.domain = CAMERA_DOMAIN,
 	},
 	/* Camera */
@@ -188,34 +188,50 @@ static struct msm_iommu_domain msm_iommu_domains[] = {
 int msm_iommu_map_extra(struct iommu_domain *domain,
 				unsigned long start_iova,
 				unsigned long size,
+				unsigned long page_size,
 				int cached)
 {
-	int i, ret = 0;
-	struct scatterlist *sglist;
-	unsigned int nrpages = PFN_ALIGN(size) >> PAGE_SHIFT;
-	struct page *dummy_page = phys_to_page(
-					PFN_ALIGN(virt_to_phys(iommu_dummy)));
+	int i, ret_value = 0;
+	unsigned long order = get_order(page_size);
+	unsigned long aligned_size = ALIGN(size, page_size);
+	unsigned long nrpages = aligned_size >> (PAGE_SHIFT + order);
+	unsigned long phy_addr = ALIGN(virt_to_phys(iommu_dummy), page_size);
+	unsigned long temp_iova = start_iova;
 
-	sglist = vmalloc(sizeof(*sglist) * nrpages);
-	if (!sglist) {
-		ret = -ENOMEM;
-		goto err1;
+	for (i = 0; i < nrpages; i++) {
+		int ret = iommu_map(domain, temp_iova, phy_addr, order, cached);
+		if (ret) {
+			pr_err("%s: could not map %lx in domain %p, error: %d\n",
+				__func__, start_iova, domain, ret);
+			ret_value = -EAGAIN;
+			goto out;
+		}
+		temp_iova += page_size;
 	}
-
-	sg_init_table(sglist, nrpages);
-
-	for (i = 0; i < nrpages; i++)
-		sg_set_page(&sglist[i], dummy_page, PAGE_SIZE, 0);
-
-	ret = iommu_map_range(domain, start_iova, sglist, size, cached);
-	if (ret) {
-		pr_err("%s: could not map extra %lx in domain %p\n",
-			__func__, start_iova, domain);
+	return ret_value;
+out:
+	for (; i > 0; --i) {
+		temp_iova -= page_size;
+		iommu_unmap(domain, start_iova, order);
 	}
+	return ret_value;
+}
 
-	vfree(sglist);
-err1:
-	return ret;
+void msm_iommu_unmap_extra(struct iommu_domain *domain,
+				unsigned long start_iova,
+				unsigned long size,
+				unsigned long page_size)
+{
+	int i;
+	unsigned long order = get_order(page_size);
+	unsigned long aligned_size = ALIGN(size, page_size);
+	unsigned long nrpages =  aligned_size >> (PAGE_SHIFT + order);
+	unsigned long temp_iova = start_iova;
+
+	for (i = 0; i < nrpages; ++i) {
+		iommu_unmap(domain, temp_iova, order);
+		temp_iova += page_size;
+	}
 }
 
 
@@ -336,14 +352,18 @@ static int __init msm_subsystem_iommu_init(void)
 				pool->gpool = gen_pool_create(PAGE_SHIFT, -1);
 
 				if (!pool->gpool) {
-					pr_err("%s: domain %d: could not allocate iova pool. iommu programming will not work with iova space %d\n",
+					pr_err("%s: could not allocate pool\n",
+						__func__);
+					pr_err("%s: domain %d iova space %d\n",
 						__func__, i, j);
 					continue;
 				}
 
 				if (gen_pool_add(pool->gpool, pool->paddr,
 						pool->size, -1)) {
-					pr_err("%s: domain %d: could not add memory to iova pool. iommu programming will not work with iova space %d\n",
+					pr_err("%s: could not add memory\n",
+						__func__);
+					pr_err("%s: domain %d pool %d\n",
 						__func__, i, j);
 					gen_pool_destroy(pool->gpool);
 					pool->gpool = NULL;

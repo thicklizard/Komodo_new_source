@@ -265,7 +265,7 @@ static void vid_enc_output_frame_done(struct video_client_ctx *client_ctx,
 		ion_flag = vidc_get_fd_info(client_ctx, BUFFER_TYPE_OUTPUT,
 					pmem_fd, kernel_vaddr, buffer_index,
 					&buff_handle);
-		if (ion_flag == CACHED && buff_handle) {
+		if (ion_flag == CACHED) {
 			msm_ion_do_cache_op(client_ctx->user_ion_client,
 				buff_handle,
 				(unsigned long *) kernel_vaddr,
@@ -1314,28 +1314,26 @@ static long vid_enc_ioctl(struct file *file,
 	}
 	case VEN_IOCTL_GET_SEQUENCE_HDR:
 	{
-		struct venc_seqheader seq_header;
+		struct venc_seqheader seq_header, seq_header_user;
 		if (copy_from_user(&venc_msg, arg, sizeof(venc_msg)))
 			return -EFAULT;
 
-		if (copy_from_user(&seq_header, venc_msg.in,
-			sizeof(seq_header)))
-			return -EFAULT;
-
 		DBG("VEN_IOCTL_GET_SEQUENCE_HDR\n");
+		if (copy_from_user(&seq_header_user, venc_msg.in,
+			sizeof(seq_header_user)))
+			return -EFAULT;
+		seq_header.hdrbufptr = NULL;
 		result = vid_enc_get_sequence_header(client_ctx,
 				&seq_header);
-		if (!result) {
-			ERR("get sequence header failed\n");
+		if (result && ((copy_to_user(seq_header_user.hdrbufptr,
+			seq_header.hdrbufptr, seq_header.hdrlen)) ||
+			(copy_to_user(&seq_header_user.hdrlen,
+			&seq_header.hdrlen,
+			sizeof(seq_header.hdrlen)))))
+				result = false;
+		kfree(seq_header.hdrbufptr);
+		if (!result)
 			return -EIO;
-		}
-		DBG("seq_header: buf=%x, sz=%d, hdrlen=%d\n",
-			(int)seq_header.hdrbufptr,
-			(int)seq_header.bufsize,
-			(int)seq_header.hdrlen);
-		if (copy_to_user(venc_msg.out, &seq_header,
-			sizeof(seq_header)))
-			return -EFAULT;
 		break;
 	}
 	case VEN_IOCTL_CMD_REQUEST_IFRAME:

@@ -584,10 +584,7 @@ static int ville_lcd_on(struct platform_device *pdev)
 
 static void ville_display_on(struct msm_fb_data_type *mfd)
 {
-	printk(KERN_INFO "%s ++\n", __func__);
 	mutex_lock(&mfd->dma->ov_mutex);
-
-
 
 	if (mfd->panel_info.type == MIPI_CMD_PANEL) {
 		mdp4_dsi_cmd_dma_busy_wait(mfd);
@@ -611,7 +608,6 @@ static void ville_display_on(struct msm_fb_data_type *mfd)
 		PR_DISP_INFO("%s acl enable", __func__);
 	}
 	mutex_unlock(&mfd->dma->ov_mutex);
-	printk(KERN_INFO "%s --\n", __func__);
 }
 
 static int ville_lcd_off(struct platform_device *pdev)
@@ -714,6 +710,7 @@ static void ville_lcd_shutdown(struct platform_device *pdev)
 {
 	mipi_dsi_panel_power(0);
 }
+
 
 static struct platform_driver this_driver = {
 	.probe  = ville_lcd_probe,
@@ -822,8 +819,6 @@ static int mipi_cmd_samsung_blue_qhd_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
-	pinfo.width = 49;
-	pinfo.height = 87;
 
 	pinfo.lcdc.h_back_porch = 64;
 	pinfo.lcdc.h_front_porch = 96;
@@ -862,6 +857,7 @@ static int mipi_cmd_samsung_blue_qhd_pt_init(void)
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
 	pinfo.mipi.dsi_phy_db = &dsi_cmd_mode_phy_db;
+	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_samsung_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);

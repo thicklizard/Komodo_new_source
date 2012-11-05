@@ -106,8 +106,8 @@ int xhci_halt(struct xhci_hcd *xhci)
 			STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC);
 	if (!ret) {
 		xhci->xhc_state |= XHCI_STATE_HALTED;
-		 xhci->cmd_ring_state = CMD_RING_STATE_STOPPED;
-		}
+		xhci->cmd_ring_state = CMD_RING_STATE_STOPPED;
+	}
 	return ret;
 }
 
@@ -1853,7 +1853,7 @@ static int xhci_configure_endpoint(struct xhci_hcd *xhci,
 		/* cancel the configure endpoint command */
 		ret = xhci_cancel_cmd(xhci, command, cmd_trb);
 		if (ret < 0)
-		return ret;
+			return ret;
 		return -ETIME;
 	}
 
@@ -2789,7 +2789,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	union xhci_trb *cmd_trb;
 
 	spin_lock_irqsave(&xhci->lock, flags);
-	 cmd_trb = xhci->cmd_ring->dequeue;
+	cmd_trb = xhci->cmd_ring->dequeue;
 	ret = xhci_queue_slot_control(xhci, TRB_ENABLE_SLOT, 0);
 	if (ret) {
 		spin_unlock_irqrestore(&xhci->lock, flags);
@@ -2805,7 +2805,7 @@ int xhci_alloc_dev(struct usb_hcd *hcd, struct usb_device *udev)
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for a slot\n",
 				timeleft == 0 ? "Timeout" : "Signal");
-		 /* cancel the enable slot request */
+		/* cancel the enable slot request */
 		return xhci_cancel_cmd(xhci, NULL, cmd_trb);
 	}
 
@@ -2927,10 +2927,10 @@ int xhci_address_device(struct usb_hcd *hcd, struct usb_device *udev)
 	if (timeleft <= 0) {
 		xhci_warn(xhci, "%s while waiting for a slot\n",
 				timeleft == 0 ? "Timeout" : "Signal");
-		 /* cancel the address device command */
+		/* cancel the address device command */
 		ret = xhci_cancel_cmd(xhci, NULL, cmd_trb);
-		 if (ret < 0)
-		return ret;
+		if (ret < 0)
+			return ret;
 		return -ETIME;
 	}
 

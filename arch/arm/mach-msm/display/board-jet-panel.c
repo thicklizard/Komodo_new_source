@@ -3367,8 +3367,8 @@ err_request_gpio_failed:
 #endif
 static char disable_dim_cmd[2] = {0x53, 0x24};/* DTYPE_DCS_WRITE1 */
 static struct dsi_cmd_desc disable_dim[] = {{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(disable_dim_cmd), disable_dim_cmd},};
-#ifdef CONFIG_FB_MSM_CABC
 static struct dsi_cmd_desc *dim_cmds = disable_dim; /* default disable dim */
+#ifdef CONFIG_FB_MSM_CABC
 /* for cabc enable and disable seletion */
 static char cabc_off_cmd[2] = {0x55, 0x80};/* DTYPE_DCS_WRITE1 */
 static struct dsi_cmd_desc cabc_off[] = {{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(cabc_off_cmd), cabc_off_cmd},};
@@ -3502,7 +3502,6 @@ static void jet_self_refresh_switch(int on)
 
 static void jet_display_on(struct msm_fb_data_type *mfd)
 {
-	printk(KERN_INFO "%s ++\n", __func__);
 	mutex_lock(&mfd->dma->ov_mutex);
 
 	if (mfd->panel_info.type == MIPI_CMD_PANEL) {
@@ -3519,7 +3518,6 @@ static void jet_display_on(struct msm_fb_data_type *mfd)
 			ARRAY_SIZE(sony_display_on_cmds));
 
 	mutex_unlock(&mfd->dma->ov_mutex);
-	printk(KERN_INFO "%s --\n", __func__);
 }
 
 static void mipi_dsi_set_backlight(struct msm_fb_data_type *mfd)
@@ -3817,8 +3815,6 @@ static int mipi_cmd_novatek_blue_qhd_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
-	pinfo.width = 49;
-	pinfo.height = 87;
 
 	pinfo.lcdc.h_back_porch = 64;
 	pinfo.lcdc.h_front_porch = 96;
@@ -3857,6 +3853,7 @@ static int mipi_cmd_novatek_blue_qhd_pt_init(void)
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
 	pinfo.mipi.dsi_phy_db = &dsi_fig_cmd_mode_phy_db;
+	pinfo.mipi.esc_byte_ratio = 4;
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 	jet_panel_data.self_refresh_switch = NULL;
 #endif
@@ -3927,8 +3924,6 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
-	pinfo.width = 58;
-	pinfo.height = 103;
 
 	pinfo.lcdc.h_back_porch = 104;	/* 660Mhz: 116 */
 	pinfo.lcdc.h_front_porch = 95;	/* 660Mhz: 184 */
@@ -3963,6 +3958,7 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
+	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
@@ -4073,8 +4069,6 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
-	pinfo.width = 58;
-	pinfo.height = 103;
 
 	pinfo.lcdc.h_back_porch = 104;
 	pinfo.lcdc.h_front_porch = 95;
@@ -4107,6 +4101,7 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
+	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);

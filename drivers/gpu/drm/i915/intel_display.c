@@ -7596,7 +7596,7 @@ static void cpt_init_clock_gating(struct drm_device *dev)
 		   DPLS_EDP_PPS_FIX_DIS);
 	/* Without this, mode sets may fail silently on FDI */
 	for_each_pipe(pipe)
-	I915_WRITE(TRANS_CHICKEN2(pipe), TRANS_AUTOTRAIN_GEN_STALL_DIS);
+		I915_WRITE(TRANS_CHICKEN2(pipe), TRANS_AUTOTRAIN_GEN_STALL_DIS);
 }
 
 static void ironlake_teardown_rc6(struct drm_device *dev)

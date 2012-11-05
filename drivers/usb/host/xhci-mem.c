@@ -1526,8 +1526,8 @@ void xhci_mem_cleanup(struct xhci_hcd *xhci)
 		xhci_ring_free(xhci, xhci->cmd_ring);
 	xhci->cmd_ring = NULL;
 	xhci_dbg(xhci, "Freed command ring\n");
-	 list_for_each_entry_safe(cur_cd, next_cd,
-		&xhci->cancel_cmd_list, cancel_cmd_list) {
+	list_for_each_entry_safe(cur_cd, next_cd,
+			&xhci->cancel_cmd_list, cancel_cmd_list) {
 		list_del(&cur_cd->cancel_cmd_list);
 		kfree(cur_cd);
 	}

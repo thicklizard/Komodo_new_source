@@ -66,6 +66,9 @@
 #define MSMFB_WRITEBACK_TERMINATE _IO(MSMFB_IOCTL_MAGIC, 155)
 #define MSMFB_MDP_PP _IOWR(MSMFB_IOCTL_MAGIC, 156, struct msmfb_mdp_pp)
 
+/* HTC addition */
+#define MSMFB_GET_GAMMA_CURVY	_IOWR(MSMFB_IOCTL_MAGIC, 201, struct gamma_curvy)
+
 #define FB_TYPE_3D_PANEL 0x10101010
 #define MDP_IMGTYPE2_START 0x10000
 #define MSMFB_DRIVER_VERSION	0xF9E8D701
@@ -99,6 +102,7 @@ enum {
 	MDP_YCRCB_H1V1,   /* YCrCb interleave */
 	MDP_YCBCR_H1V1,   /* YCbCr interleave */
 	MDP_IMGTYPE_LIMIT,
+	MDP_RGB_BORDERFILL,	/* border fill pipe */
 	MDP_BGR_565 = MDP_IMGTYPE2_START,      /* BGR 565 planer */
 	MDP_FB_FORMAT,    /* framebuffer format */
 	MDP_IMGTYPE_LIMIT2 /* Non valid image type after this enum */
@@ -333,9 +337,9 @@ enum {
 };
 
 /*
- * mdp_histogram_start_req is used to provide the parameters for
- * histogram start request
- */
+mdp_histogram_start_req is used to provide the parameters for
+histogram start request
+*/
 
 struct mdp_histogram_start_req {
 	uint32_t block;
@@ -344,10 +348,14 @@ struct mdp_histogram_start_req {
 	uint8_t num_bins;
 };
 
+
 /*
- * mdp_histogram_data is used to return the histogram data, once
- * the histogram is done/stopped/cance
+
+   mdp_histogram_data is used to return the histogram data, once
+   the histogram is done/stopped/cance
+
  */
+
 
 struct mdp_histogram_data {
 	uint32_t block;
@@ -437,20 +445,10 @@ struct mdp_lut_cfg_data {
 	} data;
 };
 
-struct mdp_qseed_cfg_data {
-	uint32_t block;
-	uint32_t table_num;
-	uint32_t ops;
-	uint32_t len;
-	uint32_t *data;
-};
-
-
 enum {
 	mdp_op_pcc_cfg,
 	mdp_op_csc_cfg,
 	mdp_op_lut_cfg,
-	mdp_op_qseed_cfg,
 	mdp_op_max,
 };
 
@@ -460,7 +458,6 @@ struct msmfb_mdp_pp {
 		struct mdp_pcc_cfg_data pcc_cfg_data;
 		struct mdp_csc_cfg_data csc_cfg_data;
 		struct mdp_lut_cfg_data lut_cfg_data;
-		struct mdp_qseed_cfg_data qseed_cfg_data;
 	} data;
 };
 

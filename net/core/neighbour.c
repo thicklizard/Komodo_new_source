@@ -1330,7 +1330,7 @@ int neigh_resolve_output(struct sk_buff *skb)
 			neigh_hh_init(neigh, dst, dst->ops->protocol);
 
 		do {
-			 __skb_pull(skb, skb_network_offset(skb));
+			__skb_pull(skb, skb_network_offset(skb));
 			seq = read_seqbegin(&neigh->ha_lock);
 			err = dev_hard_header(skb, dev, ntohs(skb->protocol),
 					      neigh->ha, NULL, skb->len);

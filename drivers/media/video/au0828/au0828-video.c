@@ -1706,8 +1706,8 @@ static int vidioc_streamoff(struct file *file, void *priv,
 		del_timer_sync(&dev->vbi_timeout);
 
 		if (res_check(fh, AU0828_RESOURCE_VBI)) {
-		 videobuf_streamoff(&fh->vb_vbiq);
-		res_free(fh, AU0828_RESOURCE_VBI);
+			videobuf_streamoff(&fh->vb_vbiq);
+			res_free(fh, AU0828_RESOURCE_VBI);
 		}
 	}
 

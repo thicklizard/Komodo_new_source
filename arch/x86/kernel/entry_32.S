@@ -1071,8 +1071,8 @@ ENTRY(xen_failsafe_callback)
 2:	mov 8(%esp),%es
 3:	mov 12(%esp),%fs
 4:	mov 16(%esp),%gs
-/* EAX == 0 => Category 1 (Bad segment)
-EAX != 0 => Category 2 (Bad IRET) */
+	/* EAX == 0 => Category 1 (Bad segment)
+	   EAX != 0 => Category 2 (Bad IRET) */
 	testl %eax,%eax
 	popl_cfi %eax
 	lea 16(%esp),%esp
@@ -1080,7 +1080,7 @@ EAX != 0 => Category 2 (Bad IRET) */
 	jz 5f
 	addl $16,%esp
 	jmp iret_exc
-5:  pushl_cfi $-1 /* orig_ax = -1 => not a system call */
+5:	pushl_cfi $-1 /* orig_ax = -1 => not a system call */
 	SAVE_ALL
 	jmp ret_from_exception
 	CFI_ENDPROC
