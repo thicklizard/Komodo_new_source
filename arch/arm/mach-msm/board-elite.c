@@ -87,6 +87,8 @@
 #include <mach/msm_rtb.h>
 #include <mach/msm_cache_dump.h>
 #include <mach/scm.h>
+#include <mach/iommu_domains.h>
+
 #include <linux/fmem.h>
 
 #include "timer.h"
@@ -134,7 +136,7 @@ static uint32_t msm_rpm_get_swfi_latency(void);
 extern int panel_type;
 static unsigned int engineerid;
 
-/* void mdp_color_enhancement(const struct mdp_reg *reg_seq, int size); */
+void mdp_color_enhancement(const struct mdp_reg *reg_seq, int size);
 
 #ifdef CONFIG_FLASHLIGHT_TPS61310
 #ifdef CONFIG_MSM_CAMERA_FLASH
@@ -328,7 +330,7 @@ void elite_lcd_id_power(int pull)
 
 #endif
 
-#define MSM_PMEM_ADSP_SIZE         0x6D00000
+#define MSM_PMEM_ADSP_SIZE         0x6D00000 /* Need to be multiple of 64K */
 #define MSM_PMEM_ADSP2_SIZE        0x730000
 #define MSM_PMEM_AUDIO_SIZE        0x2B4000
 #ifdef CONFIG_MSM_IOMMU
@@ -542,7 +544,9 @@ static int msm8960_paddr_to_memtype(unsigned int paddr)
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
-	.align = PAGE_SIZE,
+	.align = SZ_64K,
+	.iommu_map_all = 1,
+	.iommu_2x_map_domain = VIDEO_DOMAIN,
 };
 
 static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
@@ -797,7 +801,8 @@ static void __init elite_early_memory(void)
 static void __init elite_reserve(void)
 {
 	msm_reserve();
-	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size);
+	fmem_pdata.align = PAGE_SIZE;
+	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size, fmem_pdata.align);
 }
 static int msm8960_change_memory_power(u64 start, u64 size,
 	int change_type)
@@ -841,7 +846,6 @@ int set_two_phase_freq(int cpufreq);
 
 #define MDP_VSYNC_GPIO 0
 
-/* #define PANEL_NAME_MAX_LEN	30 */
 #define MIPI_CMD_NOVATEK_QHD_PANEL_NAME	"mipi_cmd_novatek_qhd"
 #define MIPI_VIDEO_NOVATEK_QHD_PANEL_NAME	"mipi_video_novatek_qhd"
 #define MIPI_VIDEO_TOSHIBA_WSVGA_PANEL_NAME	"mipi_video_toshiba_wsvga"
@@ -3054,7 +3058,7 @@ int elite_mdp_color_enhance(void)
 	return 0;
 }
 */
-/* struct mdp_reg elite_sony_nt_gamma[] = {
+struct mdp_reg elite_sony_nt_gamma[] = {
 	{0x94800, 0x000000, 0x0},
 	{0x94804, 0x020202, 0x0},
 	{0x94808, 0x040404, 0x0},
@@ -3573,7 +3577,6 @@ int elite_mdp_color_enhance(void)
 	{0x90070, 0x17, 0x0},
 #endif
 };
-*/
 
 int elite_mdp_gamma(void)
 {
@@ -3605,6 +3608,7 @@ static struct msm_panel_common_pdata mdp_pdata = {
 #endif
 	/*.mdp_color_enhance = elite_mdp_color_enhance,*/
 	.mdp_gamma = elite_mdp_gamma,
+	.cont_splash_enabled = 0x0,
 };
 
 void __init msm8960_mdp_writeback(struct memtype_reserve* reserve_table)
@@ -5237,61 +5241,32 @@ static struct msm_spi_platform_data msm8960_qup_spi_gsbi10_pdata = {
 #ifdef CONFIG_USB_MSM_OTG_72K
 static struct msm_otg_platform_data msm_otg_pdata;
 #else
-#define USB_5V_EN		42
+#define USB_5V_EN		ELITE_GPIO_V_BOOST_5V_EN
+
+static uint32_t USB_5V_EN_pin_ouput_table[] = {
+	GPIO_CFG(USB_5V_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+};
+
 static void msm_hsusb_vbus_power(bool on)
 {
-	int rc;
-	static bool vbus_is_on;
-	static struct regulator *mvs_otg_switch;
-	struct pm_gpio param = {
-		.direction	= PM_GPIO_DIR_OUT,
-		.output_buffer	= PM_GPIO_OUT_BUF_CMOS,
-		.output_value	= 1,
-		.pull		= PM_GPIO_PULL_NO,
-		.vin_sel	= PM_GPIO_VIN_S4,
-		.out_strength	= PM_GPIO_STRENGTH_MED,
-		.function	= PM_GPIO_FUNC_NORMAL,
-	};
+
+	static bool vbus_is_on = false;
 
 	if (vbus_is_on == on)
 		return;
 
+	gpio_tlmm_config(USB_5V_EN_pin_ouput_table[0], GPIO_CFG_ENABLE);
+
 	if (on) {
-		mvs_otg_switch = regulator_get(&msm8960_device_otg.dev,
-					       "vbus_otg");
-		if (IS_ERR(mvs_otg_switch)) {
-			pr_err("Unable to get mvs_otg_switch\n");
-			return;
-		}
+		gpio_set_value(USB_5V_EN, 1);
+		pr_info("[USB] %s: Enable 5V power\n",  __func__);
+	} else {
+		gpio_set_value(USB_5V_EN, 0);
+		pr_info("[USB] %s: Disable 5V power\n",  __func__);
 
-		rc = gpio_request(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-						"usb_5v_en");
-		if (rc < 0) {
-			pr_err("failed to request usb_5v_en gpio\n");
-			goto put_mvs_otg;
-		}
-
-		if (regulator_enable(mvs_otg_switch)) {
-			pr_err("unable to enable mvs_otg_switch\n");
-			goto free_usb_5v_en;
-		}
-
-		rc = pm8xxx_gpio_config(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-				&param);
-		if (rc < 0) {
-			pr_err("failed to configure usb_5v_en gpio\n");
-			goto disable_mvs_otg;
-		}
-		vbus_is_on = true;
-		return;
 	}
-disable_mvs_otg:
-		regulator_disable(mvs_otg_switch);
-free_usb_5v_en:
-		gpio_free(PM8921_GPIO_PM_TO_SYS(USB_5V_EN));
-put_mvs_otg:
-		regulator_put(mvs_otg_switch);
-		vbus_is_on = false;
+	vbus_is_on = on;
+
 }
 
 static int elite_phy_init_seq[] = { 0x7c, 0x81, 0x3c, 0x82, -1 };

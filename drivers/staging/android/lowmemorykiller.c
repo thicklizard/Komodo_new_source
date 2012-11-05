@@ -34,8 +34,6 @@
 #include <linux/mm.h>
 #include <linux/oom.h>
 #include <linux/sched.h>
-#include <linux/swap.h>
-#include <linux/rcupdate.h>
 #include <linux/notifier.h>
 #include <linux/memory.h>
 #include <linux/memory_hotplug.h>
@@ -43,7 +41,7 @@
 #include <linux/fs.h>
 #include <../../../fs/proc/internal.h>
 
-static uint32_t lowmem_debug_level = 1;
+static uint32_t lowmem_debug_level = 2;
 static int lowmem_adj[6] = {
 	0,
 	1,
@@ -51,7 +49,7 @@ static int lowmem_adj[6] = {
 	12,
 };
 static int lowmem_adj_size = 4;
-static int lowmem_minfree[6] = {
+static size_t lowmem_minfree[6] = {
 	3 * 512,	/* 6MB */
 	2 * 1024,	/* 8MB */
 	4 * 1024,	/* 16MB */
@@ -204,7 +202,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int selected_tasksize = 0;
 	int selected_oom_adj;
 	int array_size = ARRAY_SIZE(lowmem_adj);
-	int other_free = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
+	int other_free = global_page_state(NR_FREE_PAGES);
 	int other_file = global_page_state(NR_FILE_PAGES) -
 		global_page_state(NR_SHMEM) - global_page_state(NR_MLOCK);
 
@@ -279,7 +277,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	}
 	selected_oom_adj = min_adj;
 
-	rcu_read_lock();
+	read_lock(&tasklist_lock);
 	for_each_process(p) {
 		struct mm_struct *mm;
 		struct signal_struct *sig;
@@ -337,12 +335,12 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 			show_meminfo();
 			dump_tasks();
 		}
-		send_sig(SIGKILL, selected, 0);
+		force_sig(SIGKILL, selected);
 		rem -= selected_tasksize;
 	}
 	lowmem_print(4, "lowmem_shrink %lu, %x, return %d\n",
 		     sc->nr_to_scan, sc->gfp_mask, rem);
-	rcu_read_unlock();
+	read_unlock(&tasklist_lock);
 	return rem;
 }
 

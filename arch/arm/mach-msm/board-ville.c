@@ -76,6 +76,8 @@
 #include <mach/msm_rtb.h>
 #include <mach/msm_cache_dump.h>
 #include <mach/scm.h>
+#include <mach/iommu_domains.h>
+
 #include <linux/fmem.h>
 
 #include <linux/akm8975.h>
@@ -361,7 +363,7 @@ enum {
 
 #endif
 
-#define MSM_PMEM_ADSP_SIZE         0x6D00000
+#define MSM_PMEM_ADSP_SIZE         0x6D00000 /* Need to be multiple of 64K */
 #define MSM_PMEM_ADSP2_SIZE        0x700000
 #define MSM_PMEM_AUDIO_SIZE        0x2B4000
 #ifdef CONFIG_MSM_IOMMU
@@ -576,7 +578,9 @@ static int msm8960_paddr_to_memtype(unsigned int paddr)
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
-	.align = PAGE_SIZE,
+	.align = SZ_64K,
+	.iommu_map_all = 1,
+	.iommu_2x_map_domain = VIDEO_DOMAIN,
 };
 
 static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
@@ -831,7 +835,8 @@ static void __init ville_early_memory(void)
 static void __init ville_reserve(void)
 {
 	msm_reserve();
-	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size);
+	fmem_pdata.align = PAGE_SIZE;
+	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size, fmem_pdata.align);
 }
 static int msm8960_change_memory_power(u64 start, u64 size,
 	int change_type)
@@ -2644,6 +2649,7 @@ static struct msm_panel_common_pdata mdp_pdata = {
 #else
 	.mem_hid = MEMTYPE_EBI1,
 #endif
+	.cont_splash_enabled = 0x0,
 };
 
 void __init msm8960_mdp_writeback(struct memtype_reserve* reserve_table)
@@ -2965,6 +2971,7 @@ static void __init msm_fb_add_devices(void)
 #ifdef CONFIG_MSM_BUS_SCALING
 	msm_fb_register_device("dtv", &dtv_pdata);
 #endif
+	pr_info("%s: panel type is: 0x%x\n", __func__, panel_type);
 }
 
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
@@ -4160,63 +4167,29 @@ static struct usb_mass_storage_platform_data mass_storage_pdata = {
 #ifdef CONFIG_USB_MSM_OTG_72K
 static struct msm_otg_platform_data msm_otg_pdata;
 #else
-#define USB_5V_EN		42
+#define USB_5V_EN		VILLE_GPIO_V_BOOST_5V_EN
+
+static uint32_t USB_5V_EN_pin_ouput_table[] = {
+	GPIO_CFG(USB_5V_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
+};
+
 static void msm_hsusb_vbus_power(bool on)
 {
-	int rc;
-	static bool vbus_is_on;
-	static struct regulator *mvs_otg_switch;
-	struct pm_gpio param = {
-		.direction	= PM_GPIO_DIR_OUT,
-		.output_buffer	= PM_GPIO_OUT_BUF_CMOS,
-		.output_value	= 1,
-		.pull		= PM_GPIO_PULL_NO,
-		.vin_sel	= PM_GPIO_VIN_S4,
-		.out_strength	= PM_GPIO_STRENGTH_MED,
-		.function	= PM_GPIO_FUNC_NORMAL,
-	};
+	static bool vbus_is_on = false;
 
 	if (vbus_is_on == on)
 		return;
 
-	printk(KERN_INFO "%s: %d\n", __func__, on);
+	gpio_tlmm_config(USB_5V_EN_pin_ouput_table[0], GPIO_CFG_ENABLE);
 
 	if (on) {
-		mvs_otg_switch = regulator_get(&msm8960_device_otg.dev,
-					       "vbus_otg");
-		if (IS_ERR(mvs_otg_switch)) {
-			pr_err("Unable to get mvs_otg_switch\n");
-			return;
-		}
-
-		rc = gpio_request(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-						"usb_5v_en");
-		if (rc < 0) {
-			pr_err("failed to request usb_5v_en gpio\n");
-			goto put_mvs_otg;
-		}
-
-		if (regulator_enable(mvs_otg_switch)) {
-			pr_err("unable to enable mvs_otg_switch\n");
-			goto free_usb_5v_en;
-		}
-
-		rc = pm8xxx_gpio_config(PM8921_GPIO_PM_TO_SYS(USB_5V_EN),
-				&param);
-		if (rc < 0) {
-			pr_err("failed to configure usb_5v_en gpio\n");
-			goto disable_mvs_otg;
-		}
-		vbus_is_on = true;
-		return;
+		gpio_set_value(USB_5V_EN, 1);
+		pr_info("[USB] %s: Enable 5V power\n",  __func__);
+	} else {
+		gpio_set_value(USB_5V_EN, 0);
+		pr_info("[USB] %s: Disable 5V power\n",  __func__);
 	}
-disable_mvs_otg:
-		regulator_disable(mvs_otg_switch);
-free_usb_5v_en:
-		gpio_free(PM8921_GPIO_PM_TO_SYS(USB_5V_EN));
-put_mvs_otg:
-		regulator_put(mvs_otg_switch);
-		vbus_is_on = false;
+	vbus_is_on = on;
 }
 
 static int phy_init_seq_v3[] = { 0x7f, 0x81, 0x3c, 0x82, -1};
