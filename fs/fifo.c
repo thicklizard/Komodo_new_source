@@ -14,7 +14,7 @@
 #include <linux/sched.h>
 #include <linux/pipe_fs_i.h>
 
-static int wait_for_partner(struct inode* inode, unsigned int *cnt)
+static bool wait_for_partner(struct inode* inode, unsigned int *cnt)
 {
 	int cur = *cnt;	
 
@@ -23,7 +23,7 @@ static int wait_for_partner(struct inode* inode, unsigned int *cnt)
 		if (signal_pending(current))
 			break;
 	}
-	return cur == *cnt ? -ERESTARTSYS : 0;
+	return cur != *cnt;
 }
 
 static void wake_up_partner(struct inode* inode)

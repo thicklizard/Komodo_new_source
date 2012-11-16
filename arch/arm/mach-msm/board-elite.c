@@ -87,8 +87,6 @@
 #include <mach/msm_rtb.h>
 #include <mach/msm_cache_dump.h>
 #include <mach/scm.h>
-#include <mach/iommu_domains.h>
-
 #include <linux/fmem.h>
 
 #include "timer.h"
@@ -330,7 +328,7 @@ void elite_lcd_id_power(int pull)
 
 #endif
 
-#define MSM_PMEM_ADSP_SIZE         0x6D00000 /* Need to be multiple of 64K */
+#define MSM_PMEM_ADSP_SIZE         0x6D00000
 #define MSM_PMEM_ADSP2_SIZE        0x730000
 #define MSM_PMEM_AUDIO_SIZE        0x2B4000
 #ifdef CONFIG_MSM_IOMMU
@@ -544,9 +542,7 @@ static int msm8960_paddr_to_memtype(unsigned int paddr)
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
-	.align = SZ_64K,
-	.iommu_map_all = 1,
-	.iommu_2x_map_domain = VIDEO_DOMAIN,
+	.align = PAGE_SIZE,
 };
 
 static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
@@ -801,8 +797,7 @@ static void __init elite_early_memory(void)
 static void __init elite_reserve(void)
 {
 	msm_reserve();
-	fmem_pdata.align = PAGE_SIZE;
-	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size, fmem_pdata.align);
+	fmem_pdata.phys = reserve_memory_for_fmem(fmem_pdata.size);
 }
 static int msm8960_change_memory_power(u64 start, u64 size,
 	int change_type)
@@ -846,6 +841,7 @@ int set_two_phase_freq(int cpufreq);
 
 #define MDP_VSYNC_GPIO 0
 
+#define PANEL_NAME_MAX_LEN	30
 #define MIPI_CMD_NOVATEK_QHD_PANEL_NAME	"mipi_cmd_novatek_qhd"
 #define MIPI_VIDEO_NOVATEK_QHD_PANEL_NAME	"mipi_video_novatek_qhd"
 #define MIPI_VIDEO_TOSHIBA_WSVGA_PANEL_NAME	"mipi_video_toshiba_wsvga"
@@ -3608,7 +3604,6 @@ static struct msm_panel_common_pdata mdp_pdata = {
 #endif
 	/*.mdp_color_enhance = elite_mdp_color_enhance,*/
 	.mdp_gamma = elite_mdp_gamma,
-	.cont_splash_enabled = 0x0,
 };
 
 void __init msm8960_mdp_writeback(struct memtype_reserve* reserve_table)

@@ -248,6 +248,8 @@ static struct resource msm_iommu_gfx3d1_resources[] = {
 	},
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 resources used in gfx2d0/gfx2d1 instance devices.
+/*
 static struct resource msm_iommu_gfx2d0_resources[] = {
 	{
 		.start = 0x07D00000,
@@ -289,6 +291,8 @@ static struct resource msm_iommu_gfx2d1_resources[] = {
 		.flags = IORESOURCE_IRQ,
 	},
 };
+*/
+//HTC_END
 
 static struct resource msm_iommu_vcap_resources[] = {
 	{
@@ -371,6 +375,8 @@ static struct msm_iommu_dev gfx3d1_iommu = {
 	.ncb = 3,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 instance device data used for gfx2d0/gfx2d1 instance devices.
+/*
 static struct msm_iommu_dev gfx2d0_iommu = {
 	.name = "gfx2d0",
 	.ncb = 2,
@@ -380,6 +386,8 @@ static struct msm_iommu_dev gfx2d1_iommu = {
 	.name = "gfx2d1",
 	.ncb = 2,
 };
+*/
+//HTC_END
 
 static struct msm_iommu_dev vcap_iommu = {
 	.name = "vcap",
@@ -496,6 +504,8 @@ static struct platform_device msm_device_iommu_gfx3d1 = {
 	.resource = msm_iommu_gfx3d1_resources,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 instance devices.
+/*
 static struct platform_device msm_device_iommu_gfx2d0 = {
 	.name = "msm_iommu",
 	.id = 10,
@@ -515,6 +525,8 @@ static struct platform_device msm_device_iommu_gfx2d1 = {
 	.num_resources = ARRAY_SIZE(msm_iommu_gfx2d1_resources),
 	.resource = msm_iommu_gfx2d1_resources,
 };
+*/
+//HTC_END
 
 static struct platform_device msm_device_iommu_vcap = {
 	.name = "msm_iommu",
@@ -550,26 +562,26 @@ static struct msm_iommu_ctx_dev vpe_dst_ctx = {
 	.mids = {1, -1}
 };
 
-static struct msm_iommu_ctx_dev mdp_port0_cb0_ctx = {
-	.name = "mdp_port0_cb0",
+static struct msm_iommu_ctx_dev mdp_vg1_ctx = {
+	.name = "mdp_vg1",
 	.num = 0,
 	.mids = {0, 2, -1}
 };
 
-static struct msm_iommu_ctx_dev mdp_port0_cb1_ctx = {
-	.name = "mdp_port0_cb1",
+static struct msm_iommu_ctx_dev mdp_rgb1_ctx = {
+	.name = "mdp_rgb1",
 	.num = 1,
 	.mids = {1, 3, 4, 5, 6, 7, 8, 9, 10, -1}
 };
 
-static struct msm_iommu_ctx_dev mdp_port1_cb0_ctx = {
-	.name = "mdp_port1_cb0",
+static struct msm_iommu_ctx_dev mdp_vg2_ctx = {
+	.name = "mdp_vg2",
 	.num = 0,
 	.mids = {0, 2, -1}
 };
 
-static struct msm_iommu_ctx_dev mdp_port1_cb1_ctx = {
-	.name = "mdp_port1_cb1",
+static struct msm_iommu_ctx_dev mdp_rgb2_ctx = {
+	.name = "mdp_rgb2",
 	.num = 1,
 	.mids = {1, 3, 4, 5, 6, 7, 8, 9, 10, -1}
 };
@@ -654,6 +666,8 @@ static struct msm_iommu_ctx_dev gfx3d1_priv_ctx = {
 		 31, -1}
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 context bank device data used in gfx2d0/gfx2d1 context bank devices.
+/*
 static struct msm_iommu_ctx_dev gfx2d0_2d0_ctx = {
 	.name = "gfx2d0_2d0",
 	.num = 0,
@@ -665,6 +679,8 @@ static struct msm_iommu_ctx_dev gfx2d1_2d1_ctx = {
 	.num = 0,
 	.mids = {0, 1, 2, 3, 4, 5, 6, 7, -1}
 };
+*/
+//HTC_END
 
 static struct msm_iommu_ctx_dev vcap_vc_ctx = {
 	.name = "vcap_vc",
@@ -710,7 +726,7 @@ static struct platform_device msm_device_vpe_dst_ctx = {
 	},
 };
 
-static struct platform_device msm_device_mdp_port0_cb0_ctx = {
+static struct platform_device msm_device_mdp_vg1_ctx = {
 	.name = "msm_iommu_ctx",
 	.id = 4,
 	.dev = {
@@ -718,7 +734,7 @@ static struct platform_device msm_device_mdp_port0_cb0_ctx = {
 	},
 };
 
-static struct platform_device msm_device_mdp_port0_cb1_ctx = {
+static struct platform_device msm_device_mdp_rgb1_ctx = {
 	.name = "msm_iommu_ctx",
 	.id = 5,
 	.dev = {
@@ -726,7 +742,7 @@ static struct platform_device msm_device_mdp_port0_cb1_ctx = {
 	},
 };
 
-static struct platform_device msm_device_mdp_port1_cb0_ctx = {
+static struct platform_device msm_device_mdp_vg2_ctx = {
 	.name = "msm_iommu_ctx",
 	.id = 6,
 	.dev = {
@@ -734,7 +750,7 @@ static struct platform_device msm_device_mdp_port1_cb0_ctx = {
 	},
 };
 
-static struct platform_device msm_device_mdp_port1_cb1_ctx = {
+static struct platform_device msm_device_mdp_rgb2_ctx = {
 	.name = "msm_iommu_ctx",
 	.id = 7,
 	.dev = {
@@ -846,6 +862,8 @@ static struct platform_device msm_device_gfx3d1_priv_ctx = {
 	},
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 context bank devices.
+/*
 static struct platform_device msm_device_gfx2d0_2d0_ctx = {
 	.name = "msm_iommu_ctx",
 	.id = 19,
@@ -861,6 +879,8 @@ static struct platform_device msm_device_gfx2d1_2d1_ctx = {
 		.parent = &msm_device_iommu_gfx2d1.dev,
 	},
 };
+*/
+//HTC_END
 
 static struct platform_device msm_device_vcap_vc_ctx = {
 	.name = "msm_iommu_ctx",
@@ -891,10 +911,14 @@ static struct platform_device *msm_iommu_common_devs[] = {
 	&msm_device_iommu_gfx3d,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 instance device array used for registration.
+/*
 static struct platform_device *msm_iommu_gfx2d_devs[] = {
 	&msm_device_iommu_gfx2d0,
 	&msm_device_iommu_gfx2d1,
 };
+*/
+//HTC_END
 
 static struct platform_device *msm_iommu_8064_devs[] = {
 	&msm_device_iommu_gfx3d1,
@@ -914,10 +938,14 @@ static struct msm_iommu_dev *msm_iommu_common_data[] = {
 	&gfx3d_iommu,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 instance device data array used for registration.
+/*
 static struct msm_iommu_dev *msm_iommu_gfx2d_data[] = {
 	&gfx2d0_iommu,
 	&gfx2d1_iommu,
 };
+*/
+//HTC_END
 
 static struct msm_iommu_dev *msm_iommu_8064_data[] = {
 	&gfx3d1_iommu,
@@ -929,10 +957,10 @@ static struct platform_device *msm_iommu_common_ctx_devs[] = {
 	&msm_device_jpegd_dst_ctx,
 	&msm_device_vpe_src_ctx,
 	&msm_device_vpe_dst_ctx,
-	&msm_device_mdp_port0_cb0_ctx,
-	&msm_device_mdp_port0_cb1_ctx,
-	&msm_device_mdp_port1_cb0_ctx,
-	&msm_device_mdp_port1_cb1_ctx,
+	&msm_device_mdp_vg1_ctx,
+	&msm_device_mdp_rgb1_ctx,
+	&msm_device_mdp_vg2_ctx,
+	&msm_device_mdp_rgb2_ctx,
 	&msm_device_rot_src_ctx,
 	&msm_device_rot_dst_ctx,
 	&msm_device_ijpeg_src_ctx,
@@ -946,10 +974,14 @@ static struct platform_device *msm_iommu_common_ctx_devs[] = {
 	&msm_device_gfx3d_priv_ctx,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 context bank device array used for registration.
+/*
 static struct platform_device *msm_iommu_gfx2d_ctx_devs[] = {
 	&msm_device_gfx2d0_2d0_ctx,
 	&msm_device_gfx2d1_2d1_ctx,
 };
+*/
+//HTC_END
 
 static struct platform_device *msm_iommu_8064_ctx_devs[] = {
 	&msm_device_gfx3d1_user_ctx,
@@ -963,10 +995,10 @@ static struct msm_iommu_ctx_dev *msm_iommu_common_ctx_data[] = {
 	&jpegd_dst_ctx,
 	&vpe_src_ctx,
 	&vpe_dst_ctx,
-	&mdp_port0_cb0_ctx,
-	&mdp_port0_cb1_ctx,
-	&mdp_port1_cb0_ctx,
-	&mdp_port1_cb1_ctx,
+	&mdp_vg1_ctx,
+	&mdp_rgb1_ctx,
+	&mdp_vg2_ctx,
+	&mdp_rgb2_ctx,
 	&rot_src_ctx,
 	&rot_dst_ctx,
 	&ijpeg_src_ctx,
@@ -980,10 +1012,14 @@ static struct msm_iommu_ctx_dev *msm_iommu_common_ctx_data[] = {
 	&gfx3d_priv_ctx,
 };
 
+//HTC_START Jason Huang 20120710 --- Remove gfx2d0/gfx2d1 context bank device data array used for registration.
+/*
 static struct msm_iommu_ctx_dev *msm_iommu_gfx2d_ctx_data[] = {
 	&gfx2d0_2d0_ctx,
 	&gfx2d1_2d1_ctx,
 };
+*/
+//HTC_END
 
 static struct msm_iommu_ctx_dev *msm_iommu_8064_ctx_data[] = {
 	&gfx3d1_user_ctx,
@@ -1057,10 +1093,15 @@ failure_unwind:
 static int __init iommu_init(void)
 {
 	int ret;
+
+	//HTC_START Jason Huang 20120410 --- To fix build errors when CONFIG_MSM_IOMMU=y
+	/*
 	if (!msm_soc_version_supports_iommu()) {
 		pr_err("IOMMU is not supported on this SoC version.\n");
 		return -ENODEV;
 	}
+	*/
+	//HTC_END
 
 	ret = platform_device_register(&msm_root_iommu_dev);
 	if (ret != 0) {
@@ -1081,9 +1122,14 @@ static int __init iommu_init(void)
 				 msm_iommu_8064_data,
 				 ARRAY_SIZE(msm_iommu_8064_devs));
 	} else {
+		//HTC_START Jason Huang 20120710 --- Don't init gfx2d0/gfx2d1 instance devices
+		//                                   IOMMU is not used for graphic engines on 8960.
+		/*
 		ret = iommu_init_devs(msm_iommu_gfx2d_devs,
 					 msm_iommu_gfx2d_data,
 					ARRAY_SIZE(msm_iommu_gfx2d_devs));
+		*/
+		//HTC_END
 	}
 	if (ret != 0)
 		goto failure2;
@@ -1101,9 +1147,14 @@ static int __init iommu_init(void)
 				msm_iommu_8064_ctx_data,
 				ARRAY_SIZE(msm_iommu_8064_ctx_devs));
 	} else {
+		//HTC_START Jason Huang 20120710 --- Don't init gfx2d0/gfx2d1 context bank devices.
+		//                                   IOMMU is not used for graphic engines on 8960.
+		/*
 		ret = iommu_init_ctx_devs(msm_iommu_gfx2d_ctx_devs,
 					msm_iommu_gfx2d_ctx_data,
 					ARRAY_SIZE(msm_iommu_gfx2d_ctx_devs));
+		*/
+		//HTC_END
 	}
 	if (ret != 0)
 		goto failure2;
@@ -1129,8 +1180,12 @@ static void __exit iommu_exit(void)
 		for (i = 0; i < ARRAY_SIZE(msm_iommu_8064_ctx_devs); i++)
 			platform_device_unregister(msm_iommu_8064_ctx_devs[i]);
 	} else {
+		//HTC_START Jason Huang 20120710 --- gfx2d0/gfx2d1 context bank devices aren't init-ed thus no need to un-register them.
+		/*
 		for (i = 0; i < ARRAY_SIZE(msm_iommu_gfx2d_ctx_devs); i++)
 			platform_device_unregister(msm_iommu_gfx2d_ctx_devs[i]);
+		*/
+		//HTC_END
 	}
 
 	/* Common devs. */
@@ -1142,8 +1197,12 @@ static void __exit iommu_exit(void)
 		for (i = 0; i < ARRAY_SIZE(msm_iommu_8064_devs); i++)
 			platform_device_unregister(msm_iommu_8064_devs[i]);
 	} else {
+		//HTC_START Jason Huang 20120710 --- gfx2d0/gfx2d1 instance devices aren't init-ed thus no need to un-register them.
+		/*
 		for (i = 0; i < ARRAY_SIZE(msm_iommu_gfx2d_devs); i++)
 			platform_device_unregister(msm_iommu_gfx2d_devs[i]);
+		*/
+		//HTC_END
 	}
 
 	platform_device_unregister(&msm_root_iommu_dev);

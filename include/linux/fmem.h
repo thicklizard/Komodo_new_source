@@ -21,7 +21,6 @@ struct fmem_platform_data {
 	unsigned long phys;
 	unsigned long size;
 	unsigned long reserved_size;
-	unsigned long align;
 };
 
 struct fmem_data {

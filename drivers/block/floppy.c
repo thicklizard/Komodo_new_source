@@ -1032,7 +1032,6 @@ static int fd_wait_for_completion(unsigned long delay, timeout_fn function)
 	return 0;
 }
 
-
 static void setup_DMA(void)
 {
 	unsigned long f;
@@ -1077,7 +1076,6 @@ static void setup_DMA(void)
 	fd_enable_dma();
 	release_dma_lock(f);
 #endif
-	
 }
 
 static void show_floppy(void);
@@ -1679,7 +1677,6 @@ irqreturn_t floppy_interrupt(int irq, void *dev_id)
 	fd_disable_dma();
 	release_dma_lock(f);
 
-	
 	do_floppy = NULL;
 	if (fdc >= N_FDC || FDCS->address == -1) {
 		/* we don't even know which FDC is the culprit */
@@ -1827,7 +1824,6 @@ static void floppy_shutdown(unsigned long data)
 	if (initialized)
 		show_floppy();
 	cancel_activity();
-
 
 	flags = claim_dma_lock();
 	fd_disable_dma();
@@ -4474,7 +4470,6 @@ static void floppy_release_irq_and_dma(void)
 #if N_FDC > 1
 	set_dor(1, ~8, 0);
 #endif
-	
 
 	if (floppy_track_buffer && max_buffer_sectors) {
 		tmpsize = max_buffer_sectors * 1024;

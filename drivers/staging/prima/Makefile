@@ -1,3 +1,10 @@
+
+CFLAGS_wlan_hdd_ftm.o += -O2
+CFLAGS_csrUtil.o += -O2
+CFLAGS_csrApiRoam.o += -O2
+CFLAGS_wlan_qct_tl.o += -O2
+CFLAGS_wlan_qct_wda.o += -O2
+
 MODNAME := prima_wlan
 
 #Do we panic on bug?  default is to warn

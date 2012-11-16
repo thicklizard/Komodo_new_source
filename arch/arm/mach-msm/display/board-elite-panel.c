@@ -2690,6 +2690,8 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
+	pinfo.width = 58;
+	pinfo.height = 103;
 
 	pinfo.lcdc.h_back_porch = 104;
 	pinfo.lcdc.h_front_porch = 95;
@@ -2724,7 +2726,6 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &mipi_dsi_sony_panel_id28103_phy_ctrl_720p;
-	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_elite_device_register(&pinfo, MIPI_DSI_PRIM, MIPI_DSI_PANEL_WVGA_PT);
 	if (ret)
@@ -2773,6 +2774,8 @@ static int __init mipi_video_himax_720p_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
+	pinfo.width = 58;
+	pinfo.height = 103;
 
 	pinfo.lcdc.h_back_porch = 116;
 	pinfo.lcdc.h_front_porch = 62;
@@ -2812,7 +2815,6 @@ static int __init mipi_video_himax_720p_pt_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 57;
 	pinfo.mipi.dsi_phy_db = &phy_ctrl_720p_id311100;
-	pinfo.mipi.esc_byte_ratio = 4;
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 	elite_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
@@ -2901,6 +2903,8 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
+	pinfo.width = 58;
+	pinfo.height = 103;
 
 	pinfo.lcdc.h_back_porch = 125;
 	pinfo.lcdc.h_front_porch = 122;
@@ -2935,7 +2939,6 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 57;
 	pinfo.mipi.dsi_phy_db = &mipi_dsi_sharp_panel_idA1B100_phy_ctrl_720p;
-	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_elite_device_register(&pinfo, MIPI_DSI_PRIM, MIPI_DSI_PANEL_WVGA_PT);
 

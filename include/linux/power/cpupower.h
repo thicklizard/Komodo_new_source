@@ -20,4 +20,3 @@ struct cputopo_power {
 };
 
 #endif
-

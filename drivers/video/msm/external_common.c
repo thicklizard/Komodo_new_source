@@ -83,15 +83,6 @@ const char edid_blk1[0x100] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xDF};
 #endif /* DEBUG_EDID */
 
-/* Needed for compilation */
-void mdp_vid_quant_set(void)
-{
-       /*
-        * Support for quantization to be added
-        * only when MHL support is included.
-        */
-}
-
 const char *video_format_2string(uint32 format)
 {
 	switch (format) {
@@ -1754,7 +1745,6 @@ void hdmi_common_init_panel_info(struct msm_panel_info *pinfo)
 	pinfo->xres = timing->active_h;
 	pinfo->yres = timing->active_v;
 	pinfo->clk_rate = timing->pixel_freq*1000;
-	pinfo->frame_rate = 60;
 
 	pinfo->lcdc.h_back_porch = timing->back_porch_h;
 	pinfo->lcdc.h_front_porch = timing->front_porch_h;

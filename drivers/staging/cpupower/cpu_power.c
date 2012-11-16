@@ -45,7 +45,6 @@ static void set_cpufreq_scale(unsigned int cpuid, unsigned int freq)
 	if (idx >= cpu_power[cpuid].power->max)
 		idx = cpu_power[cpuid].power->max - 1;
 
-	set_power_scale(cpuid, cpu_power[cpuid].power->table[idx]);
 	smp_wmb();
 }
 
@@ -135,16 +134,14 @@ static int __devinit cpupower_probe(struct platform_device *pdev)
 	topo_cpufreq_init(pdev);
 
 	/* register cpufreq notifer */
-	topology_register_notifier(&topo_policy_nb);
-
+	
 	return 0;
 }
 
 static int __devexit cpupower_remove(struct platform_device *pdev)
 {
 	/* unregister cpufreq notifer */
-	topology_unregister_notifier(&topo_policy_nb);
-
+	
 	topo_cpufreq_exit(pdev);
 
 	return 0;

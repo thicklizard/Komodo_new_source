@@ -93,7 +93,6 @@ do {									\
 			"memory");					\
 } while (0)
 
-
 #else
 
 /* frame pointer must be last for get_wchan */

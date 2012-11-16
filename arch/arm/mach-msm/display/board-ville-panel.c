@@ -819,6 +819,8 @@ static int mipi_cmd_samsung_blue_qhd_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
+	pinfo.width = 49;
+	pinfo.height = 87;
 
 	pinfo.lcdc.h_back_porch = 64;
 	pinfo.lcdc.h_front_porch = 96;
@@ -857,7 +859,6 @@ static int mipi_cmd_samsung_blue_qhd_pt_init(void)
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
 	pinfo.mipi.dsi_phy_db = &dsi_cmd_mode_phy_db;
-	pinfo.mipi.esc_byte_ratio = 4;
 
 	ret = mipi_samsung_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);

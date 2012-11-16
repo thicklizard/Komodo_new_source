@@ -587,6 +587,98 @@ fail:
 	return ret;
 }
 
+//HTC_START Jason Huang 20120419 --- Create HTC own iommu_map_range API.
+int htc_iommu_map_range(struct iommu_domain *domain, unsigned long va,
+			 phys_addr_t pa, int size, int prot)
+{
+	struct msm_priv *priv;
+	unsigned long flags;
+	unsigned long *fl_table;
+	unsigned long *fl_pte;
+	unsigned long fl_offset;
+	unsigned long *sl_table;
+	unsigned long *sl_pte;
+	unsigned long sl_offset;
+	unsigned int pgprot;
+	int ret = 0;
+	int i = 0;
+
+	spin_lock_irqsave(&msm_iommu_lock, flags);
+
+	priv = domain->priv;
+	if (!priv) {
+		ret = -EINVAL;
+		goto fail;
+	}
+
+	fl_table = priv->pgtable;
+
+	if (!fl_table) {
+		pr_debug("Null page table\n");
+		ret = -EINVAL;
+		goto fail;
+	}
+
+	pgprot = __get_pgprot(prot, SZ_4K);
+
+	if (!pgprot) {
+		ret = -EINVAL;
+		goto fail;
+	}
+
+	for(i = 0; i < size; i += SZ_4K, va += SZ_4K, pa += SZ_4K)
+	{
+		fl_offset = FL_OFFSET(va);	/* Upper 12 bits */
+		fl_pte = fl_table + fl_offset;	/* int pointers, 4 bytes */
+
+		/* Need a 2nd level table */
+		if (*fl_pte == 0) {
+			unsigned long *sl;
+			sl = (unsigned long *) __get_free_pages(GFP_ATOMIC,
+							get_order(SZ_4K));
+
+			if (!sl) {
+				pr_debug("Could not allocate second level table\n");
+				ret = -ENOMEM;
+				goto fail;
+			}
+			memset(sl, 0, SZ_4K);
+
+			*fl_pte = ((((int)__pa(sl)) & FL_BASE_MASK) | \
+						      FL_TYPE_TABLE);
+
+			if (!priv->redirect)
+				clean_pte(fl_pte, fl_pte + 1);
+		}
+
+		if (!(*fl_pte & FL_TYPE_TABLE)) {
+			ret = -EBUSY;
+			goto fail;
+		}
+
+		sl_table = (unsigned long *) __va(((*fl_pte) & FL_BASE_MASK));
+		sl_offset = SL_OFFSET(va);
+		sl_pte = sl_table + sl_offset;
+
+		if (*sl_pte) {
+			ret = -EBUSY;
+			goto fail;
+		}
+
+		*sl_pte = (pa & SL_BASE_MASK_SMALL) | SL_AP0 | SL_AP1 | SL_NG |
+					  SL_SHARED | SL_TYPE_SMALL | pgprot;
+		if (!priv->redirect)
+			clean_pte(sl_pte, sl_pte + 1);
+	}
+
+	ret = __flush_iotlb(domain);
+
+fail:
+	spin_unlock_irqrestore(&msm_iommu_lock, flags);
+	return ret;
+}
+//HTC_END
+
 static int msm_iommu_unmap(struct iommu_domain *domain, unsigned long va,
 			    int order)
 {
@@ -690,19 +782,6 @@ fail:
 	return ret;
 }
 
-static unsigned int get_phys_addr(struct scatterlist *sg)
-{
-	/*
-	 * Try sg_dma_address first so that we can
-	 * map carveout regions that do not have a
-	 * struct page associated with them.
-	 */
-	unsigned int pa = sg_dma_address(sg);
-	if (pa == 0)
-		pa = sg_phys(sg);
-	return pa;
-}
-
 static int msm_iommu_map_range(struct iommu_domain *domain, unsigned int va,
 			       struct scatterlist *sg, unsigned int len,
 			       int prot)
@@ -741,12 +820,7 @@ static int msm_iommu_map_range(struct iommu_domain *domain, unsigned int va,
 	sl_table = (unsigned long *) __va(((*fl_pte) & FL_BASE_MASK));
 	sl_offset = SL_OFFSET(va);
 
-	chunk_pa = get_phys_addr(sg);
-	if (chunk_pa == 0) {
-		pr_debug("No dma address for sg %p\n", sg);
-		ret = -EINVAL;
-		goto fail;
-	}
+	chunk_pa = sg_phys(sg);
 
 	while (offset < len) {
 		/* Set up a 2nd level page table if one doesn't exist */
@@ -788,13 +862,7 @@ static int msm_iommu_map_range(struct iommu_domain *domain, unsigned int va,
 			if (chunk_offset >= sg->length && offset < len) {
 				chunk_offset = 0;
 				sg = sg_next(sg);
-				chunk_pa = get_phys_addr(sg);
-				if (chunk_pa == 0) {
-					pr_debug("No dma address for sg %p\n",
-						 sg);
-					ret = -EINVAL;
-					goto fail;
-				}
+				chunk_pa = sg_phys(sg);
 			}
 		}
 
@@ -1063,9 +1131,6 @@ static void __init setup_iommu_tex_classes(void)
 
 static int __init msm_iommu_init(void)
 {
-	if (!msm_soc_version_supports_iommu())
-		return -ENODEV;
-
 	setup_iommu_tex_classes();
 	register_iommu(&msm_iommu_ops);
 	return 0;

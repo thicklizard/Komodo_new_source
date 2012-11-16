@@ -341,7 +341,6 @@ void (*pm_idle)(void);
 EXPORT_SYMBOL(pm_idle);
 #endif
 
-
 static inline int hlt_use_halt(void)
 {
 	return 1;
