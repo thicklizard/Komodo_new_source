@@ -1,5 +1,6 @@
 obj-y := msm_fb.o
 
+CFLAGS_external_common.o += -O2
 obj-$(CONFIG_FB_MSM_LOGO) += logo.o
 obj-$(CONFIG_FB_BACKLIGHT) += msm_fb_bl.o
 
