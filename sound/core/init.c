@@ -474,7 +474,7 @@ int snd_card_free_when_closed(struct snd_card *card)
         }
 
 	card->free_on_last_close = 1;
-	if (atomic_dec_and_test(&card->refcount)
+	if (atomic_dec_and_test(&card->refcount))
 		snd_card_do_free(card);
 	return 0;
 }

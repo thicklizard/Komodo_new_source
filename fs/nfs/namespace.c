@@ -52,7 +52,7 @@ static struct vfsmount *nfs_do_submount(struct dentry *dentry,
  *                     (if unset, the original name is returned verbatim)
  */
 char *nfs_path(char **p, struct dentry *dentry, char *buffer, ssize_t buflen,
-               unsigned flags)n)
+               unsigned flags)
 {
 	char *end;
 	int namelen;

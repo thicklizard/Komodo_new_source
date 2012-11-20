@@ -758,14 +758,13 @@ retry:
 	 * Should we force take the futex? See below.
 	 */
 	if (unlikely(force_take)) {
-                /*
-                 * Keep the OWNER_DIED and the WAITERS bit and set the
-                 * new TID value.
-                 */
-                newval = (curval & ~FUTEX_TID_MASK) | vpid;
-                force_take = 0;
-                lock_taken = 1;
-        }
+		/*
+		 * Keep the OWNER_DIED and the WAITERS bit and set the
+		 * new TID value.
+		 */
+		newval = (curval & ~FUTEX_TID_MASK) | vpid;
+		force_take = 0;
+		lock_taken = 1;
 	}
 
 	if (unlikely(cmpxchg_futex_value_locked(&curval, uaddr, uval, newval)))
@@ -789,26 +788,26 @@ retry:
 		switch (ret) {
 		case -ESRCH:
 			/*
-			  * We failed to find an owner for this
-                         * futex. So we have no pi_state to block
-                         * on. This can happen in two cases:
-                         *
-                         * 1) The owner died
-                         * 2) A stale FUTEX_WAITERS bit
-                         *
-                         * Re-read the futex value.
+			 * We failed to find an owner for this
+			 * futex. So we have no pi_state to block
+			 * on. This can happen in two cases:
+			 *
+			 * 1) The owner died
+			 * 2) A stale FUTEX_WAITERS bit
+			 *
+			 * Re-read the futex value.
 			 */
 			if (get_futex_value_locked(&curval, uaddr))
 				return -EFAULT;
 
 			/*
 			 * If the owner died or we have a stale
-                         * WAITERS bit the owner TID in the user space
-                         * futex is 0.
-                         */
-                        if (!(curval & FUTEX_TID_MASK)) {
-                                force_take = 1;
-                                goto retry;
+			 * WAITERS bit the owner TID in the user space
+			 * futex is 0.
+			 */
+			if (!(curval & FUTEX_TID_MASK)) {
+				force_take = 1;
+				goto retry;
 			}
 		default:
 			break;
@@ -2753,3 +2752,4 @@ static int __init futex_init(void)
 	return 0;
 }
 __initcall(futex_init);
+
