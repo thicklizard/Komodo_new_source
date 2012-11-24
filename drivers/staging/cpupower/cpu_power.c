@@ -125,9 +125,9 @@ static int topo_policy_transition(struct notifier_block *nb,
 	return NOTIFY_OK;
 }
 
-static struct notifier_block topo_policy_nb = {
-	.notifier_call = topo_policy_transition,
-};
+ static struct notifier_block topo_policy_nb = {
+  	.notifier_call = topo_policy_transition,
+ };
 
 static int __devinit cpupower_probe(struct platform_device *pdev)
 {
