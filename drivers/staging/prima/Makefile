@@ -4,6 +4,7 @@ CFLAGS_csrUtil.o += -O2
 CFLAGS_csrApiRoam.o += -O2
 CFLAGS_wlan_qct_tl.o += -O2
 CFLAGS_wlan_qct_wda.o += -O2
+CFLAGS_csrApiScan.o += -O1
 
 MODNAME := prima_wlan
 
