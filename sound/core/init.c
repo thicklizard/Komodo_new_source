@@ -454,11 +454,11 @@ static int snd_card_do_free(struct snd_card *card)
  */
 void snd_card_unref(struct snd_card *card)
 {
-        if (atomic_dec_and_test(&card->refcount)) {
-                wake_up(&card->shutdown_sleep);
-                if (card->free_on_last_close)
-                        snd_card_do_free(card);
-        }
+	if (atomic_dec_and_test(&card->refcount)) {
+		wake_up(&card->shutdown_sleep);
+		if (card->free_on_last_close)
+			snd_card_do_free(card);
+	}
 }
 EXPORT_SYMBOL(snd_card_unref);
 
@@ -466,12 +466,12 @@ int snd_card_free_when_closed(struct snd_card *card)
 {
 	int ret;
 
-	 atomic_inc(&card->refcount);
-        ret = snd_card_disconnect(card);
-        if (ret) {
-                atomic_dec(&card->refcount);
-                return ret;
-        }
+	atomic_inc(&card->refcount);
+	ret = snd_card_disconnect(card);
+	if (ret) {
+		atomic_dec(&card->refcount);
+		return ret;
+	}
 
 	card->free_on_last_close = 1;
 	if (atomic_dec_and_test(&card->refcount))
@@ -488,7 +488,7 @@ int snd_card_free(struct snd_card *card)
 		return ret;
 
 	/* wait, until all devices are ready for the free operation */
-	wait_event(card->shutdown_sleep, !atomic_read(&card->refcount));;
+	wait_event(card->shutdown_sleep, !atomic_read(&card->refcount));
 	snd_card_do_free(card);
 	return 0;
 }
@@ -892,7 +892,7 @@ EXPORT_SYMBOL(snd_card_file_add);
 int snd_card_file_remove(struct snd_card *card, struct file *file)
 {
 	struct snd_monitor_file *mfile, *found = NULL;
-	
+
 	spin_lock(&card->files_lock);
 	list_for_each_entry(mfile, &card->files_list, list) {
 		if (mfile->file == file) {

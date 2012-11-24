@@ -560,7 +560,7 @@ static void snd_usb_audio_disconnect(struct usb_device *dev, void *ptr)
 
 	chip = ptr;
 	card = chip->card;
-	down_write(&chip->shutdown_rwsem);;
+	down_write(&chip->shutdown_rwsem);
 	chip->shutdown = 1;
 	up_write(&chip->shutdown_rwsem);
 

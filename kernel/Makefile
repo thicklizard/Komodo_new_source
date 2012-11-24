@@ -4,6 +4,7 @@
 
 ifdef CONFIG_CC_OPTIMIZE_ALOT
 CFLAGS_workqueue.o += -O2
+CFLAGS_sysctl.o += -O1
 endif
 obj-y     = sched.o fork.o exec_domain.o panic.o printk.o \
 	    cpu.o exit.o itimer.o time.o softirq.o resource.o \

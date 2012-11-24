@@ -305,7 +305,7 @@ static int get_ctl_value_v1(struct usb_mixer_elem_info *cval, int request, int v
 		}
 	}
 	snd_printdd(KERN_ERR "cannot get ctl value: req = %#x, wValue = %#x, wIndex = %#x, type = %d\n",
-		request, validx, idx, cval->val_type);
+		    request, validx, idx, cval->val_type);
 	err = -EINVAL;
 
  out:
@@ -351,7 +351,7 @@ static int get_ctl_value_v2(struct usb_mixer_elem_info *cval, int request, int v
 	if (ret < 0) {
 error:
 		snd_printk(KERN_ERR "cannot get ctl value: req = %#x, wValue = %#x, wIndex = %#x, type = %d\n",
-			  request, validx, idx, cval->val_type);
+			   request, validx, idx, cval->val_type);
 		return ret;
 	}
 
@@ -466,7 +466,7 @@ int snd_usb_mixer_set_ctl_value(struct usb_mixer_elem_info *cval,
 		}
 	}
 	snd_printdd(KERN_ERR "cannot set ctl value: req = %#x, wValue = %#x, wIndex = %#x, type = %d, data = %#x/%#x\n",
-	request, validx, idx, cval->val_type, buf[0], buf[1]);
+		    request, validx, idx, cval->val_type, buf[0], buf[1]);
 	err = -EINVAL;
 
  out:

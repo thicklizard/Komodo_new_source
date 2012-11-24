@@ -207,7 +207,7 @@ static int snd_audigy2nx_led_put(struct snd_kcontrol *kcontrol, struct snd_ctl_e
 			      usb_sndctrlpipe(mixer->chip->dev, 0), 0x24,
 			      USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_OTHER,
 			      value, index + 2, NULL, 0, 100);
-out:
+ out:
 	up_read(&mixer->chip->shutdown_rwsem);
 	if (err < 0)
 		return err;
