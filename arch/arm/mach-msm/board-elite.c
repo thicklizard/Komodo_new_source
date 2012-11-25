@@ -376,15 +376,19 @@ void elite_lcd_id_power(int pull)
 #define MSM_ION_MM_SIZE		0x3800000
 >>>>>>> 558e0ca... msm: HTC 8960: Reduce ION carveout heaps
 #define MSM_ION_SF_SIZE		0x0
+<<<<<<< HEAD
 >>>>>>> edb5c87... msm: HTC 8960: clean up memory size definitions
+=======
+#define MSM_ION_QSECOM_SIZE	0x780000 /* (7.5MB) */
+>>>>>>> 91a4472... msm: HTC 8960: Increase QSECOM ION heap to 7.5MB
 #define MSM_ION_HEAP_NUM	7
 #else
 #define MSM_ION_MM_SIZE		MSM_PMEM_ADSP_SIZE
 #define MSM_ION_SF_SIZE		MSM_PMEM_SIZE
+#define MSM_ION_QSECOM_SIZE	0x600000 /* (6MB) */
 #define MSM_ION_HEAP_NUM	8
 #endif
 #define MSM_ION_MM_FW_SIZE	0x200000 /* (2MB) */
-#define MSM_ION_QSECOM_SIZE	0x100000 /* (1MB) */
 #define MSM_ION_MFC_SIZE	SZ_8K
 #define MSM_ION_AUDIO_SIZE	MSM_PMEM_AUDIO_SIZE
 
