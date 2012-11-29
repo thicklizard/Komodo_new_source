@@ -50,8 +50,6 @@ static struct clk *mdp_clk;
 static struct clk *mdp_pclk;
 static struct clk *mdp_lut_clk;
 int mdp_rev;
-
-static struct platform_device *mdp_init_pdev;
 static struct regulator *footswitch;
 static unsigned int mdp_footswitch_on;
 
@@ -1505,7 +1503,7 @@ unsigned long mdp_perf_level2clk_rate(uint32 perf_level)
 	return clk_rate;
 }
 
-static int mdp_irq_clk_setup(struct platform_device *pdev)
+static int mdp_irq_clk_setup(void)
 {
 	int ret;
 
@@ -1528,7 +1526,7 @@ static int mdp_irq_clk_setup(struct platform_device *pdev)
 		mdp_footswitch_on = 1;
 	}
 
-	mdp_clk = clk_get(&pdev->dev, "core_clk");
+	mdp_clk = clk_get(NULL, "mdp_clk");
 	if (IS_ERR(mdp_clk)) {
 		ret = PTR_ERR(mdp_clk);
 		printk(KERN_ERR "can't get mdp_clk error:%d!\n", ret);
@@ -1536,12 +1534,12 @@ static int mdp_irq_clk_setup(struct platform_device *pdev)
 		return ret;
 	}
 
-	mdp_pclk = clk_get(&pdev->dev, "iface_clk");
+	mdp_pclk = clk_get(NULL, "mdp_pclk");
 	if (IS_ERR(mdp_pclk))
 		mdp_pclk = NULL;
 
 	if (mdp_rev == MDP_REV_42) {
-		mdp_lut_clk = clk_get(&pdev->dev, "lut_clk");
+		mdp_lut_clk = clk_get(NULL, "lut_mdp");
 		if (IS_ERR(mdp_lut_clk)) {
 			ret = PTR_ERR(mdp_lut_clk);
 			pr_err("can't get mdp_clk error:%d!\n", ret);
@@ -1586,7 +1584,7 @@ static int mdp_probe(struct platform_device *pdev)
 #endif
 
 	if ((pdev->id == 0) && (pdev->num_resources > 0)) {
-		mdp_init_pdev = pdev;
+
 		mdp_pdata = pdev->dev.platform_data;
 
 		size =  resource_size(&pdev->resource[0]);
@@ -1605,8 +1603,7 @@ static int mdp_probe(struct platform_device *pdev)
 		}
 
 		mdp_rev = mdp_pdata->mdp_rev;
-
-		rc = mdp_irq_clk_setup(pdev);
+		rc = mdp_irq_clk_setup();
 
 		if (rc)
 			return rc;
@@ -1743,7 +1740,7 @@ static int mdp_probe(struct platform_device *pdev)
 
 		mdp4_display_intf_sel(if_no, intf);
 #endif
-		mdp_config_vsync(mdp_init_pdev, mfd);
+		mdp_config_vsync(mfd);
 		break;
 
 #ifdef CONFIG_FB_MSM_MIPI_DSI
@@ -1824,7 +1821,7 @@ static int mdp_probe(struct platform_device *pdev)
 		mfd->lut_update = mdp_lut_update_nonlcdc;
 		mfd->do_histogram = mdp_do_histogram;
 #endif
-		mdp_config_vsync(mdp_init_pdev, mfd);
+		mdp_config_vsync(mfd);
 		break;
 #endif
 

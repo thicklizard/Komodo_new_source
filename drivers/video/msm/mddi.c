@@ -2,7 +2,7 @@
  * MSM MDDI Transport
  *
  * Copyright (C) 2007 Google Incorporated
- * Copyright (c) 2007-2012, Code Aurora Forum. All rights reserved.
+ * Copyright (C) 2007 QUALCOMM Incorporated
  *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
