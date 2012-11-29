@@ -580,8 +580,7 @@ static int mipi_d2l_lcd_on(struct platform_device *pdev)
 	mipi_d2l_enable_3d(mfd, false, false);
 
 	/* Add I2C driver only after DSI-CLK is running */
-	if (d2l_i2c_client == NULL)
-		i2c_add_driver(&d2l_i2c_slave_driver);
+	i2c_add_driver(&d2l_i2c_slave_driver);
 
 	pr_info("%s.ret=%d.\n", __func__, ret);
 
@@ -995,8 +994,6 @@ static struct platform_driver d2l_driver = {
 static int mipi_d2l_init(void)
 {
 	pr_debug("%s.\n", __func__);
-
-	d2l_i2c_client = NULL;
 
 	return platform_driver_register(&d2l_driver);
 }
