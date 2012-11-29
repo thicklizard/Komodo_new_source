@@ -710,11 +710,25 @@ static int ion_cp_heap_map_iommu(struct ion_buffer *buffer,
 	struct iommu_domain *domain;
 	int ret = 0;
 	unsigned long extra;
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
 	struct scatterlist *sglist = 0;
 	struct ion_cp_heap *cp_heap =
 		container_of(buffer->heap, struct ion_cp_heap, heap);
 	int prot = IOMMU_WRITE | IOMMU_READ;
 	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
+>>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
+=======
+	int prot = ION_IS_CACHED(flags) ? 1 : 0;
+	struct scatterlist *sglist = 0;
+>>>>>>> 73c17ee... gpu: ion: Map a range into the IOMMU
+=======
+	struct scatterlist *sglist = 0;
+	int prot = IOMMU_WRITE | IOMMU_READ;
+	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
+>>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
 
 	data->mapped_size = iova_length;
 
@@ -968,4 +982,3 @@ static int ion_cp_unprotect_mem(unsigned int phy_base, unsigned int size,
 	return scm_call(SCM_SVC_CP, SCM_CP_LOCK_CMD_ID,
 			&cmd, sizeof(cmd), NULL, 0);
 }
-

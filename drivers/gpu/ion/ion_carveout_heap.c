@@ -284,9 +284,23 @@ int ion_carveout_heap_map_iommu(struct ion_buffer *buffer,
 	struct iommu_domain *domain;
 	int ret = 0;
 	unsigned long extra;
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
 	struct scatterlist *sglist = 0;
 	int prot = IOMMU_WRITE | IOMMU_READ;
 	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
+>>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
+=======
+	int prot = ION_IS_CACHED(flags) ? 1 : 0;
+	struct scatterlist *sglist = 0;
+>>>>>>> 73c17ee... gpu: ion: Map a range into the IOMMU
+=======
+	struct scatterlist *sglist = 0;
+	int prot = IOMMU_WRITE | IOMMU_READ;
+	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
+>>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
 
 	data->mapped_size = iova_length;
 
@@ -446,4 +460,3 @@ void ion_carveout_heap_destroy(struct ion_heap *heap)
 	kfree(carveout_heap);
 	carveout_heap = NULL;
 }
-
