@@ -540,15 +540,11 @@ static int msm8960_paddr_to_memtype(unsigned int paddr)
 	return MEMTYPE_EBI1;
 }
 
-#define FMEM_ENABLED 0
-
 #ifdef CONFIG_ION_MSM
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 	.permission_type = IPT_TYPE_MM_CARVEOUT,
 	.align = SZ_64K,
-	.reusable = FMEM_ENABLED,
-	.mem_is_fmem = FMEM_ENABLED,
 	.iommu_map_all = 1,
 	.iommu_2x_map_domain = VIDEO_DOMAIN,
 };
@@ -556,20 +552,16 @@ static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
 static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
 	.permission_type = IPT_TYPE_MFC_SHAREDMEM,
 	.align = PAGE_SIZE,
-	.reusable = 0,
-	.mem_is_fmem = FMEM_ENABLED,
 };
 
 static struct ion_co_heap_pdata co_ion_pdata = {
 	.adjacent_mem_id = INVALID_HEAP_ID,
 	.align = PAGE_SIZE,
-	.mem_is_fmem = 0,
 };
 
 static struct ion_co_heap_pdata fw_co_ion_pdata = {
 	.adjacent_mem_id = ION_CP_MM_HEAP_ID,
 	.align = SZ_128K,
-	.mem_is_fmem = FMEM_ENABLED,
 };
 #endif
 
@@ -665,36 +657,10 @@ struct platform_device fmem_device = {
 	.dev = { .platform_data = &fmem_pdata },
 };
 
-<<<<<<< HEAD
-=======
-static void __init adjust_mem_for_liquid(void)
-{
-}
-
-static void __init reserve_mem_for_ion(enum ion_memory_types mem_type,
-					unsigned long size)
-{
-	msm8960_reserve_table[mem_type].size += size;
-}
-
-/**
- * Reserve memory for ION and calculate amount of reusable memory for fmem.
- * We only reserve memory for heaps that are not reusable. However, we only
- * support one reusable heap at the moment so we ignore the reusable flag for
- * other than the first heap with reusable flag set. Also handle special case
- * for video heaps (MM,FW, and MFC). Video requires heaps MM and MFC to be
- * at a higher address than FW in addition to not more than 256MB away from the
- * base address of the firmware. This means that if MM is reusable the other
- * two heaps must be allocated in the same region as FW. This is handled by the
- * mem_is_fmem flag in the platform data. In addition the MM heap must be
- * adjacent to the FW heap for content protection purposes.
- */
->>>>>>> 76cd605... msm: HTC8960: move MFC heap to different address
 static void reserve_ion_memory(void)
 {
 #if defined(CONFIG_ION_MSM) && defined(CONFIG_MSM_MULTIMEDIA_USE_ION)
 	unsigned int i;
-<<<<<<< HEAD
 
 	if (!pmem_param_set && machine_is_msm8960_liquid()) {
 		msm_ion_cp_mm_size = MSM_LIQUID_ION_MM_SIZE;
@@ -706,71 +672,6 @@ static void reserve_ion_memory(void)
 				break;
 			}
 		}
-=======
-	unsigned int reusable_count = 0;
-
-	adjust_mem_for_liquid();
-	fmem_pdata.size = 0;
-	fmem_pdata.reserved_size_low = 0;
-	fmem_pdata.reserved_size_high = 0;
-
-	/* We only support 1 reusable  heap. Check if more than one heap
-	 * is specified as reusable and set as non-reusable if found.
-	 */
-	for (i = 0; i < ion_pdata.nr; ++i) {
-		const struct ion_platform_heap *heap = &(ion_pdata.heaps[i]);
-
-		if (heap->type == ION_HEAP_TYPE_CP && heap->extra_data) {
-			struct ion_cp_heap_pdata *data = heap->extra_data;
-
-			reusable_count += (data->reusable) ? 1 : 0;
-
-			if (data->reusable && reusable_count > 1) {
-				pr_err("%s: Too many heaps specified as "
-					"reusable. Heap %s was not configured "
-					"as reusable.\n", __func__, heap->name);
-				data->reusable = 0;
-			}
-		}
-	}
-
-	for (i = 0; i < ion_pdata.nr; ++i) {
-		int reusable = 0;
-		int adjacent_heap_id = INVALID_HEAP_ID;
-		int mem_is_fmem = 0;
-		const struct ion_platform_heap *heap = &(ion_pdata.heaps[i]);
-
-		if (heap->extra_data) {
-			switch (heap->type) {
-			case ION_HEAP_TYPE_CP:
-				reusable = ((struct ion_cp_heap_pdata *)
-						heap->extra_data)->reusable;
-				mem_is_fmem = ((struct ion_cp_heap_pdata *)
-						heap->extra_data)->mem_is_fmem;
-				break;
-			case ION_HEAP_TYPE_CARVEOUT:
-				adjacent_heap_id = ((struct ion_co_heap_pdata *)
-					heap->extra_data)->adjacent_mem_id;
-				mem_is_fmem = ((struct ion_co_heap_pdata *)
-						heap->extra_data)->mem_is_fmem;
-				break;
-			default:
-				break;
-			}
-		}
-
-		if (mem_is_fmem && !reusable) {
-			if (adjacent_heap_id != INVALID_HEAP_ID)
-				fmem_pdata.reserved_size_low += heap->size;
-			else
-				fmem_pdata.reserved_size_high += heap->size;
-		}
-
-		if (mem_is_fmem)
-			fmem_pdata.size += heap->size;
-		else
-			reserve_mem_for_ion(MEMTYPE_EBI1, heap->size);
->>>>>>> 76cd605... msm: HTC8960: move MFC heap to different address
 	}
 	msm8960_reserve_table[MEMTYPE_EBI1].size += msm_ion_cp_mm_size;
 	msm8960_reserve_table[MEMTYPE_EBI1].size += MSM_ION_ROTATOR_SIZE;
