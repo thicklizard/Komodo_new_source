@@ -170,17 +170,9 @@ int ion_iommu_heap_map_iommu(struct ion_buffer *buffer,
 {
 	unsigned long temp_iova;
 	struct iommu_domain *domain;
-<<<<<<< HEAD
 	struct ion_iommu_priv_data *buffer_data = buffer->priv_virt;
 	int i, j, ret = 0;
 	unsigned long extra;
-=======
-	int ret = 0;
-	unsigned long extra;
-	struct ion_iommu_priv_data *buffer_data = buffer->priv_virt;
-	int prot = IOMMU_WRITE | IOMMU_READ;
-	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
->>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
 
 	BUG_ON(!msm_use_iommu());
 

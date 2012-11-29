@@ -277,12 +277,6 @@ int ion_carveout_heap_map_iommu(struct ion_buffer *buffer,
 	struct iommu_domain *domain;
 	int i, ret = 0;
 	unsigned long extra;
-<<<<<<< HEAD
-=======
-	struct scatterlist *sglist = 0;
-	int prot = IOMMU_WRITE | IOMMU_READ;
-	prot |= ION_IS_CACHED(flags) ? IOMMU_CACHE : 0;
->>>>>>> 8e07497... iommu: Fix flags passed to iommu map functions.
 
 	data->mapped_size = iova_length;
 
