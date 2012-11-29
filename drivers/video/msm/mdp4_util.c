@@ -610,7 +610,7 @@ static uint32 vg_qseed_table0[] = {
 };
 
 static uint32 vg_qseed_table1[] = {
-	0x00000000, 0x20000000,
+	0x76543210, 0xfedcba98
 };
 
 static uint32 vg_qseed_table2[] = {
