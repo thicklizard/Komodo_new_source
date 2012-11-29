@@ -331,28 +331,20 @@ void elite_lcd_id_power(int pull)
 
 #endif
 
-<<<<<<< HEAD
 #define MSM_PMEM_ADSP_SIZE         0x6D00000 /* Need to be multiple of 64K */
 #define MSM_PMEM_ADSP2_SIZE        0x730000
 #define MSM_PMEM_AUDIO_SIZE        0x2B4000
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_PMEM_SIZE 0x00000000 /* 0 Mbytes */
 #else
-=======
-#define MSM_PMEM_ADSP_SIZE         0x65D0000 /* Need to be multiple of 64K */
-#define MSM_PMEM_AUDIO_SIZE        0x4CF000
->>>>>>> edb5c87... msm: HTC 8960: clean up memory size definitions
 #define MSM_PMEM_SIZE 0x4800000 /* 72 Mbytes */
+#endif
 #define MSM_LIQUID_PMEM_SIZE 0x4000000 /* 64 Mbytes */
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
-<<<<<<< HEAD
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x280000
 #define MSM_ION_SF_SIZE		MSM_PMEM_SIZE
 #define MSM_ION_MM_FW_SIZE	0x200000 /* (2MB) */
-=======
-#define MSM_PMEM_KERNEL_EBI1_SIZE  0x65000
->>>>>>> edb5c87... msm: HTC 8960: clean up memory size definitions
 #ifdef CONFIG_MSM_IOMMU
 /* 720P PREVIEW x 9
  * 720P THUMBNAIL x 5
@@ -362,7 +354,6 @@ void elite_lcd_id_power(int pull)
  * ALIGH INTERGER + 1MB
  */
 #define MSM_ION_MM_SIZE		0x4700000
-<<<<<<< HEAD
 #else
 #define MSM_ION_MM_SIZE		MSM_PMEM_ADSP_SIZE - MSM_PMEM_ADSP2_SIZE
 #endif
@@ -370,20 +361,10 @@ void elite_lcd_id_power(int pull)
 #define MSM_ION_QSECOM_SIZE	0x100000 /* (1MB) */
 #define MSM_ION_MFC_SIZE	0x100000  //SZ_8K
 #ifdef CONFIG_MSM_IOMMU
-=======
-#define MSM_ION_SF_SIZE		0x0
->>>>>>> edb5c87... msm: HTC 8960: clean up memory size definitions
 #define MSM_ION_HEAP_NUM	7
 #else
-#define MSM_ION_MM_SIZE		MSM_PMEM_ADSP_SIZE
-#define MSM_ION_SF_SIZE		MSM_PMEM_SIZE
 #define MSM_ION_HEAP_NUM	8
 #endif
-#define MSM_ION_MM_FW_SIZE	0x200000 /* (2MB) */
-#define MSM_ION_QSECOM_SIZE	0x100000 /* (1MB) */
-#define MSM_ION_MFC_SIZE	SZ_8K
-#define MSM_ION_AUDIO_SIZE	MSM_PMEM_AUDIO_SIZE
-
 #define MSM_LIQUID_ION_MM_SIZE (MSM_ION_MM_SIZE + 0x600000)
 <<<<<<< HEAD
 static unsigned int msm_ion_cp_mm_size = MSM_ION_MM_SIZE;
