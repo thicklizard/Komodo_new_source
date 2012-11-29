@@ -85,7 +85,6 @@ struct mdp_table_entry {
 
 extern struct mdp_ccs mdp_ccs_yuv2rgb ;
 extern struct mdp_ccs mdp_ccs_rgb2yuv ;
-/* TODO: trigger this with an ifdef */
 extern unsigned char hdmi_prim_display;
 
 /*
@@ -223,13 +222,6 @@ struct mdp_dma_data {
 	struct semaphore mutex;
 	struct completion comp;
 	struct completion dmap_comp;
-};
-
-/* HTC addition */
-struct mdp_reg {
-	uint32_t reg;
-	uint32_t val;
-	uint32_t mask;
 };
 
 extern struct list_head mdp_hist_lut_list;
