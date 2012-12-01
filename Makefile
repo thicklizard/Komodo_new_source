@@ -1,12 +1,7 @@
 VERSION = 3
 PATCHLEVEL = 0
-<<<<<<< HEAD
-SUBLEVEL = 52
-EXTRAVERSION =Komodo_21
-=======
 SUBLEVEL = 53
-EXTRAVERSION =
->>>>>>> a979786... Linux: 3.0.53
+EXTRAVERSION =Komodo_21
 NAME = Sneaky Weasel
 
 # *DOCUMENTATION*
