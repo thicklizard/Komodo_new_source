@@ -219,16 +219,10 @@ __do_page_cache_readahead(struct address_space *mapping, struct file *filp,
 	 * uptodate then the caller will launch readpage again, and
 	 * will then handle the error.
 	 */
-<<<<<<< HEAD
-	if (ret) {
-		trace_readahead(filp, ret);
-		read_pages(mapping, filp, &page_pool, ret);
-	}
-=======
 	if (ret)
 		read_pages(mapping, filp, &page_pool, ret,
 			   large_isize(end_index));
->>>>>>> e5eb45f... Implement ck1 patchset
+
 	BUG_ON(!list_empty(&page_pool));
 out:
 	return ret;

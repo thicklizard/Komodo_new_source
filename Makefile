@@ -10,12 +10,6 @@ NAME = Sneaky Weasel
 # Comments in this file are targeted only to the developer, do not
 # expect to learn how to build the kernel reading this file.
 
-<<<<<<< HEAD
-=======
-CKVERSION = -ck1
-CKNAME = BFS Powered
-EXTRAVERSION := $(EXTRAVERSION)$(CKVERSION)
->>>>>>> e5eb45f... Implement ck1 patchset
 
 # Do not:
 # o  use make's built-in rules and variables
