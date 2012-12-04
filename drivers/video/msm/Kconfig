@@ -625,8 +625,7 @@ config FB_MSM_HDMI_MSM_PANEL_CEC_SUPPORT
 	  Support for HDMI CEC Feature
 	  Choose to enable CEC
 
-config FB_MSM_HDMI_MHL
-	depends on FB_MSM_HDMI_MSM_PANEL
+#ifdef CONFIG_MHL
 	bool 'HDMI to MHL support'
 	default n
 	---help---
