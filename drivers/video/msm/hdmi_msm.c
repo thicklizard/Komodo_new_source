@@ -4225,23 +4225,8 @@ static void hdmi_msm_hdcp_timer(unsigned long data)
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL_CEC_SUPPORT
 static void hdmi_msm_cec_read_timer_func(unsigned long data)
 {
-<<<<<<< HEAD
-	uint32 hpd_ctrl;
-#ifdef CONFIG_INTERNAL_CHARGING_SUPPORT
-	static bool omit_read_work_in_probe = 1;
-#endif
-	clk_enable(hdmi_msm_state->hdmi_app_clk);
-	hdmi_msm_state->pd->core_power(1, 1);
-#ifdef CONFIG_INTERNAL_CHARGING_SUPPORT
-	if(probe_completed && !omit_read_work_in_probe)
-		hdmi_msm_state->pd->enable_5v(1);
-	else
-		omit_read_work_in_probe = 0;
-	
-=======
 	queue_work(hdmi_work_queue, &hdmi_msm_state->cec_latch_detect_work);
 }
->>>>>>> 75d7c97... msm_fb: display: update to jb_mr1_chocolate
 #endif
 
 static void hdmi_msm_hpd_off(void)
@@ -4281,28 +4266,6 @@ static void hdmi_msm_dump_regs(const char *prefix)
 
 static int hdmi_msm_hpd_on(void)
 {
-<<<<<<< HEAD
-/*	static int phy_reset_done;*/
-
-	hdmi_msm_clk(1);
-	hdmi_msm_state->pd->core_power(1, 1);
-#ifdef CONFIG_INTERNAL_CHARGING_SUPPORT
-	if(probe_completed)
-		hdmi_msm_state->pd->enable_5v(1);
-	
-#endif
-	/*hdmi_msm_state->pd->cec_power(1);*/
-	hdmi_msm_dump_regs("HDMI-INIT: ");
-	hdmi_msm_set_mode(FALSE);
-#if 0
-	if (!phy_reset_done) {
-		hdmi_phy_reset();
-		phy_reset_done = 1;
-	}
-#endif
-	/* HDMI_USEC_REFTIMER[0x0208] */
-	HDMI_OUTP(0x0208, 0x0001001B);
-=======
 	static int phy_reset_done;
 	uint32 hpd_ctrl;
 	int rc = 0;
@@ -4357,7 +4320,6 @@ static int hdmi_msm_hpd_on(void)
 				HDMI_INP(0x0254));
 
 		hdmi_msm_state->hpd_initialized = TRUE;
->>>>>>> 75d7c97... msm_fb: display: update to jb_mr1_chocolate
 
 		enable_irq(hdmi_msm_state->irq);
 
@@ -4869,3 +4831,4 @@ MODULE_LICENSE("GPL v2");
 MODULE_VERSION("0.3");
 MODULE_AUTHOR("Qualcomm Innovation Center, Inc.");
 MODULE_DESCRIPTION("HDMI MSM TX driver");
+
