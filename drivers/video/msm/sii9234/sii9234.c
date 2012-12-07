@@ -168,20 +168,7 @@ static void detect_charger_handler(struct work_struct *w)
 	queue_delayed_work(pInfo->wq, &pInfo->detect_charger_work, HZ*2);
 }
 #endif
-#if CONFIG_INTERNAL_CHARGING_SUPPORT
-void check_mhl_5v_status(void)
-{
-	T_MHL_SII9234_INFO *pInfo = sii9234_info_ptr;
-	/*
-		for the case of (1)plug dongle +AC +HDMI  (2)remove HDMI (3) plug HDMI,
-		we should turn off internal 5v in this case step3
-	*/
-	if(pInfo->isMHL && (pInfo->statMHL == CONNECT_TYPE_AC || pInfo->statMHL == CONNECT_TYPE_USB )){
-		if(pInfo->enable_5v)
-			pInfo->enable_5v(0);
-	}
-}
-#endif
+
 void update_mhl_status(bool isMHL, enum usb_connect_type statMHL)
 {
 	T_MHL_SII9234_INFO *pInfo = sii9234_info_ptr;
