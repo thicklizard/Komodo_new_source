@@ -726,6 +726,7 @@ static struct usb_driver usb_audio_driver = {
 
 static int __init snd_usb_audio_init(void)
 {
+	int err;
 	if (nrpacks < 1 || nrpacks > MAX_PACKS) {
 		printk(KERN_WARNING "invalid nrpacks value.\n");
 		return -EINVAL;
