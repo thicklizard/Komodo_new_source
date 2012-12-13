@@ -4003,7 +4003,7 @@ static void hdmi_msm_hpd_read_work(struct work_struct *work)
 		hdmi_msm_state->pd->enable_5v(1);
 	else
 		omit_read_work_in_probe = 0;
-	check_mhl_5v_status();
+	
 #endif
 	hdmi_msm_set_mode(FALSE);
 	hdmi_msm_init_phy(external_common_state->video_resolution);
@@ -4072,7 +4072,7 @@ static int hdmi_msm_hpd_on(bool trigger_handler)
 #ifdef CONFIG_INTERNAL_CHARGING_SUPPORT
 	if(probe_completed)
 		hdmi_msm_state->pd->enable_5v(1);
-	check_mhl_5v_status();
+	
 #endif
 	/*hdmi_msm_state->pd->cec_power(1);*/
 	hdmi_msm_dump_regs("HDMI-INIT: ");
