@@ -734,14 +734,6 @@ int scsi_verify_blk_ioctl(struct block_device *bd, unsigned int cmd)
 }
 EXPORT_SYMBOL(scsi_verify_blk_ioctl);
 
-int scsi_cmd_blk_ioctl(struct block_device *bd, fmode_t mode,
-		       unsigned int cmd, void __user *arg)
-{
-	int ret;
-
-	ret = scsi_verify_blk_ioctl(bd, cmd);
-	if (ret < 0)
-		return ret;
 
 int scsi_cmd_blk_ioctl(struct block_device *bd, fmode_t mode,
 		       unsigned int cmd, void __user *arg)
