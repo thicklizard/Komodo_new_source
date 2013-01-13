@@ -1,7 +1,11 @@
 VERSION = 3
 PATCHLEVEL = 0
 SUBLEVEL = 57
+<<<<<<< HEAD
 EXTRAVERSION =Komodo_23B
+=======
+EXTRAVERSION =Komodo_22C
+>>>>>>> 86181ba... fix for linaro 4.7 and wifi tweak
 NAME = Sneaky Weasel
 
 # *DOCUMENTATION*
