@@ -381,8 +381,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		   -ffast-math \
-		   -mtune=cortex-a9 \
-		   -march=armv7-a \
+		   -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 \
 		   -mfpu=neon  
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
