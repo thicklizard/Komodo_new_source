@@ -45,7 +45,7 @@ static int __init readahead(char *str)
 	return 0;
 }
 
-early_param("readahead", readahead)
+early_param("readahead", readahead);
 
 /*
  * Initialise a struct file's readahead state.  Assumes that the caller has
