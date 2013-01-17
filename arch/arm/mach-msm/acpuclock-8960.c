@@ -96,7 +96,7 @@ static void set_acpuclk_foot_print(unsigned cpu, unsigned state)
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3C) + cpu;
@@ -114,7 +114,7 @@ static void set_acpuclk_cpu_freq_foot_print(unsigned cpu, unsigned khz)
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x40) + cpu;
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x44) + cpu;
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x30) + cpu;
@@ -132,7 +132,7 @@ static void set_acpuclk_L2_freq_foot_print(unsigned khz)
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x3c);
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_2DOT1GHZ
-	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x36);
+	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x38);
 #endif
 #ifdef CONFIG_MSM_CPU_MAX_CLK_1DOT5GHZ
 	unsigned *status = (unsigned *)(CPU_FOOT_PRINT_BASE_CPU0_VIRT + 0x38);
@@ -568,7 +568,7 @@ static struct l2_level l2_freq_tbl_8960_kraitv2[] = {
 	[10] = { {  864000, HFPLL, 1, 0, 0x20 }, 1150000, 1150000, 4 },
 	[11] = { {  918000, HFPLL, 1, 0, 0x22 }, 1150000, 1150000, 5 },
 	[12] = { {  972000, HFPLL, 1, 0, 0x24 }, 1150000, 1150000, 5 },
-	[13] = { { 1026000, HFPLL, 1, 0, 0x26 }, 1150000, 1150000, 6 },
+	[13] = { { 1026000, HFPLL, 1, 0, 0x26 }, 1150000, 1150000, 5 },
 	[14] = { { 1080000, HFPLL, 1, 0, 0x28 }, 1150000, 1150000, 6 },
 	[15] = { { 1134000, HFPLL, 1, 0, 0x2A }, 1150000, 1150000, 6 },
 	[16] = { { 1188000, HFPLL, 1, 0, 0x2C }, 1150000, 1150000, 6 },
