@@ -2296,6 +2296,7 @@ static struct dsi_cmd_desc auo_panel_video_mode_cmds_c3[] = {
 
 	/* {DTYPE_DCS_WRITE, 1, 0, 0, 150, sizeof(exit_sleep), exit_sleep}, */
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, 2, (char[]){0x53, 0x24}},
+	{DTYPE_DCS_WRITE, 1, 0, 0, 40, sizeof(display_on), display_on},
 };
 static struct dsi_cmd_desc auo_panel_video_mode_cmds_c3_1[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(set_threelane), set_threelane},
@@ -3290,8 +3291,7 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-	pinfo.mipi.esc_byte_ratio = 4;
-
+	
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
 	if (ret)
@@ -3433,8 +3433,7 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-	pinfo.mipi.esc_byte_ratio = 4;
-
+	
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
 	if (ret)
