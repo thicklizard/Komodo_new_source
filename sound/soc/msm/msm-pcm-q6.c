@@ -47,11 +47,10 @@ struct snd_msm {
 };
 
 #define PLAYBACK_NUM_PERIODS	8
-#define PLAYBACK_PERIOD_SIZE	4096
+#define PLAYBACK_PERIOD_SIZE	2048
 #define CAPTURE_NUM_PERIODS	2
 #define CAPTURE_MAX_PERIOD_SIZE 4096
 #define CAPTURE_MIN_PERIOD_SIZE 320
-
 
 static struct snd_pcm_hardware msm_pcm_hardware_capture = {
 	.info =                 (SNDRV_PCM_INFO_MMAP |
@@ -755,3 +754,4 @@ module_exit(msm_soc_platform_exit);
 
 MODULE_DESCRIPTION("PCM module platform driver");
 MODULE_LICENSE("GPL v2");
+
