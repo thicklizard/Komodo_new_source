@@ -1494,6 +1494,17 @@ config MSM_MPDEC
       This enables kernel based multi core control.
 	(up/down hotplug based on load)
 
+config MSM_MPDEC_SCROFF_FREQ
+	int "Max frequency when screen is off (khz)"
+	depends on MSM_MPDEC
+	default 486000
+
+config MSM_MPDEC_SCROFF_BOOT_DELAY
+	int "Disable Screen off for X seconds after boot"
+	depends on MSM_MPDEC
+	default 600
+
+
 config CMDLINE_OPTIONS
 	bool "Enable cmdline khz/gov/maxscroff command parsing"
 	default n
