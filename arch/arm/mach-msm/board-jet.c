@@ -333,6 +333,7 @@ void jet_lcd_id_power(int pull)
 #define MSM_PMEM_ADSP_SIZE         0x6D00000
 #define MSM_PMEM_ADSP2_SIZE        0x730000
 #define MSM_PMEM_AUDIO_SIZE        0x4CF000
+
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_PMEM_SIZE 0x00000000 /* 0 Mbytes */
 #else
@@ -2972,10 +2973,10 @@ static void headset_init(void)
 		}
 	} else {
 	/* XC and higher needs to config for level shift enable*/
-		for (i = 0; i < 5; i++) {
+		 for (i = 0; i < (sizeof(headset_rx_xc) / sizeof(int)); i++) {
 			rc = pm8xxx_gpio_config(headset_rx_xc[i].gpio,
 						&headset_rx_xc[i].config);
-			if (rc)
+			if (rc && (i < (sizeof(headset_rx) / sizeof(int))))
 				pr_info("[HS_BOARD] %s: Config ERROR: GPIO=%u, rc=%d\n",
 					__func__, headset_rx[i].gpio, rc);
 		}
