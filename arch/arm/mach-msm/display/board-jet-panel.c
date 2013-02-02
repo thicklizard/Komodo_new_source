@@ -2293,7 +2293,6 @@ static struct dsi_cmd_desc auo_panel_video_mode_cmds_c3[] = {
 	/* NVT: Enable vivid-color, and enable CABC Moving-Mode, please set register(55h) as 0x83 */
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, 2, (char[]){0x55,0x83}},
 
-
 	/* {DTYPE_DCS_WRITE, 1, 0, 0, 150, sizeof(exit_sleep), exit_sleep}, */
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, 2, (char[]){0x53, 0x24}},
 	{DTYPE_DCS_WRITE, 1, 0, 0, 40, sizeof(display_on), display_on},
@@ -3214,75 +3213,51 @@ static int mipi_video_auo_hd720p_init(void)
 {
 	int ret;
 #ifdef JEL_CMD_MODE_PANEL
-	PR_DISP_INFO("%s: CMD mode (AL)\n", __func__);
+	pinfo.xres = 720;
+	pinfo.yres = 1280;
 	pinfo.type = MIPI_CMD_PANEL;
-	pinfo.mipi.mode = DSI_CMD_MODE;
-	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-
+	pinfo.pdest = DISPLAY_1;
+	pinfo.wait_cycle = 0;
+	pinfo.bpp = 24;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
+	pinfo.lcdc.v_pulse_width = 1;
+	pinfo.lcdc.border_clr = 0;	/* blk */
+	pinfo.lcdc.underflow_clr = 0xff;	/* blue */
+	pinfo.lcdc.hsync_skew = 0;
+	pinfo.bl_max = 200;
+	pinfo.bl_min = 1;
+	pinfo.fb_num = 2;
+	pinfo.clk_rate = 507000000;
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6000; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
+	pinfo.lcd.v_pulse_width = 1;
+
+	pinfo.mipi.mode = DSI_CMD_MODE;
+	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
+	pinfo.mipi.vc = 0;
+	pinfo.mipi.data_lane0 = TRUE;
+	pinfo.mipi.data_lane1 = TRUE;
+	pinfo.mipi.data_lane2 = TRUE;
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
+	pinfo.mipi.stream = 0;	/* dma_p */
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
+	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
-
-	PR_DISP_INFO("%s: SWITCH mode (AL)\n", __func__);
-
-	pinfo.mipi.pulse_mode_hsa_he = TRUE;
-	pinfo.mipi.hfp_power_stop = TRUE;
-	pinfo.mipi.hbp_power_stop = TRUE;
-	pinfo.mipi.hsa_power_stop = TRUE;
-	pinfo.mipi.eof_bllp_power_stop = TRUE;
-	pinfo.mipi.bllp_power_stop = TRUE;
-	pinfo.mipi.traffic_mode = DSI_NON_BURST_SYNCH_PULSE;
+	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
 #endif
 
-	pinfo.xres = 720;
-	pinfo.yres = 1280;
-
-	pinfo.pdest = DISPLAY_1;
-	pinfo.wait_cycle = 0;
-	pinfo.bpp = 24;
-
-	pinfo.lcdc.h_back_porch = 104;	/* 660Mhz: 116 */
-	pinfo.lcdc.h_front_porch = 95;	/* 660Mhz: 184 */
-	pinfo.lcdc.h_pulse_width = 1;	/* 660Mhz: 24 */
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
-	pinfo.lcdc.v_pulse_width = 1;
-
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
-	pinfo.lcd.v_pulse_width = 1;
-
-	pinfo.lcdc.border_clr = 0;	/* blk */
-	pinfo.lcdc.underflow_clr = 0xff;	/* blue */
-	pinfo.lcdc.hsync_skew = 0;
-	pinfo.bl_max = 255;
-	pinfo.bl_min = 1;
-	pinfo.fb_num = 2;
-	pinfo.lcd.blt_ctrl = 1;
-	/*pinfo.clk_rate = 742500000;*/
-	/*pinfo.clk_rate = 482000000;*/
-	pinfo.clk_rate = 569000000;
-
-	pinfo.mipi.vc = 0;
-	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
-	pinfo.mipi.data_lane0 = TRUE;
-	pinfo.mipi.data_lane1 = TRUE;
-	pinfo.mipi.data_lane2 = TRUE;
-	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;	/* 660Mhz: 10 */
-	pinfo.mipi.t_clk_pre = 0x21;	/* 660Mhz: 30 */
-	pinfo.mipi.stream = 0;	/* dma_p */
-	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
-	pinfo.mipi.frame_rate = 60;
-	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-	
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
 	if (ret)
@@ -3339,74 +3314,53 @@ static int mipi_video_sony_hd720p_init(void)
 
 	/* 1:VIDEO MODE, 0:CMD MODE */
 #ifdef JEL_CMD_MODE_PANEL
-	PR_DISP_INFO("%s: CMD mode (AL)\n", __func__);
+	pinfo.xres = 720;
+	pinfo.yres = 1280;
 	pinfo.type = MIPI_CMD_PANEL;
-	pinfo.mipi.mode = DSI_CMD_MODE;
-	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-
+	pinfo.pdest = DISPLAY_1;
+	pinfo.wait_cycle = 0;
+	pinfo.bpp = 24;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
+	pinfo.lcdc.v_pulse_width = 1;
+	pinfo.lcdc.border_clr = 0;	/* blk */
+	pinfo.lcdc.underflow_clr = 0xff;	/* blue */
+	pinfo.lcdc.hsync_skew = 0;
+	pinfo.bl_max = 200;
+	pinfo.bl_min = 1;
+	pinfo.fb_num = 2;
+	pinfo.clk_rate = 507000000;
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6000; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
+	pinfo.lcd.v_pulse_width = 1;
+
+	pinfo.mipi.mode = DSI_CMD_MODE;
+	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
+	pinfo.mipi.vc = 0;
+	pinfo.mipi.data_lane0 = TRUE;
+	pinfo.mipi.data_lane1 = TRUE;
+	pinfo.mipi.data_lane2 = TRUE;
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
+	pinfo.mipi.stream = 0;	/* dma_p */
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
+	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
-
-	PR_DISP_INFO("%s: SWITCH mode (AL)\n", __func__);
-
-	pinfo.mipi.pulse_mode_hsa_he = TRUE;
-	pinfo.mipi.hfp_power_stop = TRUE;
-	pinfo.mipi.hbp_power_stop = TRUE;
-	pinfo.mipi.hsa_power_stop = TRUE;
-	pinfo.mipi.eof_bllp_power_stop = TRUE;
-	pinfo.mipi.bllp_power_stop = TRUE;
-	pinfo.mipi.traffic_mode = DSI_NON_BURST_SYNCH_PULSE;
+	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
 
 #endif
 
-	pinfo.xres = 720;
-	pinfo.yres = 1280;
 
-	pinfo.pdest = DISPLAY_1;
-	pinfo.wait_cycle = 0;
-	pinfo.bpp = 24;
-
-	pinfo.lcdc.h_back_porch = 104;
-	pinfo.lcdc.h_front_porch = 95;
-	pinfo.lcdc.h_pulse_width = 1;
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
-	pinfo.lcdc.v_pulse_width = 1;
-
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
-	pinfo.lcd.v_pulse_width = 1;
-
-	pinfo.lcdc.border_clr = 0;	/* blk */
-	pinfo.lcdc.underflow_clr = 0xff;	/* blue */
-	pinfo.lcdc.hsync_skew = 0;
-	pinfo.bl_max = 255;
-	pinfo.bl_min = 1;
-	pinfo.fb_num = 2;
-	pinfo.lcd.blt_ctrl = 1;
-	pinfo.clk_rate = 569000000;
-
-	pinfo.mipi.vc = 0;
-	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
-	pinfo.mipi.data_lane0 = TRUE;
-	pinfo.mipi.data_lane1 = TRUE;
-	pinfo.mipi.data_lane2 = TRUE;
-	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;
-	pinfo.mipi.t_clk_pre = 0x21;
-	pinfo.mipi.stream = 0;	/* dma_p */
-	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
-	pinfo.mipi.frame_rate = 60;
-	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-	
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
 	if (ret)
