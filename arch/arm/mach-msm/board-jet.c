@@ -2696,7 +2696,7 @@ static int mipi_dsi_panel_power(int on)
 }
 
 static struct mipi_dsi_platform_data mipi_dsi_pdata = {
-	.vsync_gpio = JET_LCD_TE,
+	.vsync_gpio = MDP_VSYNC_GPIO,
 	.dsi_power_save = mipi_dsi_panel_power,
 };
 #endif
@@ -2911,7 +2911,7 @@ static struct msm_bus_scale_pdata mdp_bus_scale_pdata = {
 #endif
 
 static struct msm_panel_common_pdata mdp_pdata = {
-	.gpio = JET_LCD_TE,
+	.gpio = MDP_VSYNC_GPIO,
 	.mdp_max_clk = 200000000,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
