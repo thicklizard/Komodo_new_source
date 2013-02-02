@@ -2466,10 +2466,13 @@ static int __init mipi_video_himax_720p_pt_init(void)
 	pinfo.mipi.frame_rate = 57;
 	pinfo.mipi.dsi_phy_db = &phy_ctrl_720p_id311100;
 <<<<<<< HEAD
+<<<<<<< HEAD
 	pinfo.mipi.esc_byte_ratio = 4;
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 	elite_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
+=======
+>>>>>>> c7f74db... display: jewel: evita: remove CONFIG_FB_MSM_SELF_REFRESH indefs.
 =======
 >>>>>>> c7f74db... display: jewel: evita: remove CONFIG_FB_MSM_SELF_REFRESH indefs.
 
