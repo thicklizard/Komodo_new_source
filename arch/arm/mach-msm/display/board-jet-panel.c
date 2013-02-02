@@ -3234,7 +3234,7 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.clk_rate = 507000000;
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6000; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6200; /* adjust refx100 to prevent tearing */
 	pinfo.lcd.v_back_porch = 32;
 	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
@@ -3335,7 +3335,7 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.clk_rate = 507000000;
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6000; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6200; /* adjust refx100 to prevent tearing */
 	pinfo.lcd.v_back_porch = 32;
 	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
@@ -3588,4 +3588,5 @@ static int __init jet_panel_late_init(void)
 
 module_init(jet_panel_init);
 late_initcall(jet_panel_late_init);
+
 
