@@ -3220,9 +3220,7 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
 	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
 	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-#ifdef CONFIG_FB_MSM_SELF_REFRESH
-	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
-#endif
+
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
 	pinfo.lcd.refx100 = 6400; /* adjust refx100 to prevent tearing */
@@ -3231,17 +3229,9 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.mipi.insert_dcs_cmd = TRUE;
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
-#else
-	pinfo.type = MIPI_VIDEO_PANEL;/*MIPI_VIDEO_PANEL;*/
-	pinfo.mipi.mode = DSI_VIDEO_MODE;
-	pinfo.mipi.dst_format = DSI_VIDEO_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-#ifdef CONFIG_FB_MSM_SELF_REFRESH
-	PR_DISP_INFO("%s: VIDEO mode (AL)\n", __func__);
-	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
-#else
+
 	PR_DISP_INFO("%s: SWITCH mode (AL)\n", __func__);
-#endif
+
 	pinfo.mipi.pulse_mode_hsa_he = TRUE;
 	pinfo.mipi.hfp_power_stop = TRUE;
 	pinfo.mipi.hbp_power_stop = TRUE;
@@ -3340,13 +3330,6 @@ static int mipi_video_auo_hd720p_init(void)
 	cmd_backlight_cmds = cmd_bkl_cmds;
 	cmd_backlight_cmds_count = ARRAY_SIZE(cmd_bkl_cmds);
 
-#if defined CONFIG_FB_MSM_SELF_REFRESH
-	video_to_cmds = video_to_cmd;
-	cmd_to_videos = cmd_to_video;
-	video_to_cmds_cnt	= ARRAY_SIZE(video_to_cmd);
-	cmd_to_videos_cnt = ARRAY_SIZE(cmd_to_video);
-#endif
-
 	return ret;
 }
 
@@ -3360,11 +3343,9 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.type = MIPI_CMD_PANEL;
 	pinfo.mipi.mode = DSI_CMD_MODE;
 	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
 	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-#ifdef CONFIG_FB_MSM_SELF_REFRESH
-	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
-#endif
+
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
 	pinfo.lcd.refx100 = 6400; /* adjust refx100 to prevent tearing */
@@ -3374,17 +3355,7 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
 
-#else
-	pinfo.type = MIPI_VIDEO_PANEL;
-	pinfo.mipi.mode = DSI_VIDEO_MODE;
-	pinfo.mipi.dst_format = DSI_VIDEO_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
-#ifdef CONFIG_FB_MSM_SELF_REFRESH
-	PR_DISP_INFO("%s: VIDEO mode (AL)\n", __func__);
-	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
-#else
 	PR_DISP_INFO("%s: SWITCH mode (AL)\n", __func__);
-#endif
 
 	pinfo.mipi.pulse_mode_hsa_he = TRUE;
 	pinfo.mipi.hfp_power_stop = TRUE;
@@ -3472,13 +3443,6 @@ static int mipi_video_sony_hd720p_init(void)
 
 	cmd_backlight_cmds = cmd_bkl_cmds;
 	cmd_backlight_cmds_count = ARRAY_SIZE(cmd_bkl_cmds);
-
-#if defined CONFIG_FB_MSM_SELF_REFRESH
-	video_to_cmds = video_to_cmd;
-	cmd_to_videos = cmd_to_video;
-	video_to_cmds_cnt	= ARRAY_SIZE(video_to_cmd);
-	cmd_to_videos_cnt = ARRAY_SIZE(cmd_to_video);
-#endif
 
 	return ret;
 }
