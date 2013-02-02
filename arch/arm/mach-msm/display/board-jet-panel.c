@@ -3218,12 +3218,12 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.type = MIPI_CMD_PANEL;
 	pinfo.mipi.mode = DSI_CMD_MODE;
 	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
 	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6400; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
@@ -3348,7 +3348,7 @@ static int mipi_video_sony_hd720p_init(void)
 
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6400; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
