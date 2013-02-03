@@ -2305,8 +2305,8 @@ static int mipi_video_sony_hd720p_init(void)
 		pinfo.type = MIPI_CMD_PANEL;
 		pinfo.mipi.mode = DSI_CMD_MODE;
 		pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-		/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
-		pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
+		pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
+		/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;*/
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 		elite_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
@@ -2349,15 +2349,15 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
 
-	pinfo.lcdc.h_back_porch = 104;
-	pinfo.lcdc.h_front_porch = 95;
-	pinfo.lcdc.h_pulse_width = 1;
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
 	pinfo.lcdc.v_pulse_width = 1;
 
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
 
 	pinfo.lcdc.border_clr = 0;	/* blk */
@@ -2368,7 +2368,7 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.fb_num = 2;
 	pinfo.lcd.blt_ctrl = 1;
 
-	pinfo.clk_rate = 569000000;
+	pinfo.clk_rate = 482000000;
 
 	pinfo.mipi.vc = 0;
 	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
@@ -2376,8 +2376,8 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.data_lane1 = TRUE;
 	pinfo.mipi.data_lane2 = TRUE;
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;
-	pinfo.mipi.t_clk_pre = 0x21;
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
 	pinfo.mipi.stream = 0;	/* dma_p */
 
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
@@ -2505,8 +2505,8 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 		pinfo.type = MIPI_CMD_PANEL;
 		pinfo.mipi.mode = DSI_CMD_MODE;
 		pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-		/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
-		pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
+		pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
+		/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;*/
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 		elite_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
@@ -2547,15 +2547,15 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
 
-	pinfo.lcdc.h_back_porch = 125;
-	pinfo.lcdc.h_front_porch = 122;
-	pinfo.lcdc.h_pulse_width = 1;
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
 	pinfo.lcdc.v_pulse_width = 1;
 
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
 
 	pinfo.lcdc.border_clr = 0;	/* blk */
@@ -2566,7 +2566,7 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 	pinfo.fb_num = 2;
 	pinfo.lcd.blt_ctrl = 1;
 
-	pinfo.clk_rate = 569000000;
+	pinfo.clk_rate = 482000000;
 
 	pinfo.mipi.vc = 0;
 	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
@@ -2574,12 +2574,12 @@ static int __init mipi_video_sharp_nt_720p_pt_init(void)
 	pinfo.mipi.data_lane1 = TRUE;
 	pinfo.mipi.data_lane2 = TRUE;
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;
-	pinfo.mipi.t_clk_pre = 0x21;
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
 	pinfo.mipi.stream = 0; /* dma_p */
 
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
-	pinfo.mipi.frame_rate = 57;
+	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &mipi_dsi_sharp_panel_idA1B100_phy_ctrl_720p;
 	pinfo.mipi.esc_byte_ratio = 4;
 
