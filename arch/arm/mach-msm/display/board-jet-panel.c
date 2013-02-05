@@ -32,7 +32,12 @@ static struct dsi_cmd_desc *video_on_cmds = NULL;
 static struct dsi_cmd_desc *command_on_cmds = NULL;
 static struct dsi_cmd_desc *display_off_cmds = NULL;
 static struct dsi_cmd_desc *cmd_backlight_cmds = NULL;
-
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+static struct dsi_cmd_desc *video_to_cmds = NULL;
+static struct dsi_cmd_desc *cmd_to_videos = NULL;
+int video_to_cmds_cnt = 0;
+int cmd_to_videos_cnt = 0;
+#endif
 int video_on_cmds_count = 0;
 int command_on_cmds_count = 0;
 int display_off_cmds_count = 0;
@@ -2783,6 +2788,101 @@ static struct dsi_cmd_desc auo_panel_video_mode_cmds_c3_1[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 40, sizeof(display_on), display_on},
 };
 
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+#define DSI_VIDEO_BASE	0xE0000
+static struct msm_panel_common_pdata *mipi_jet_pdata;
+static char display_mode_video_cmd_1[2] = {0xC2, 0x0B}; /* DTYPE_DCS_WRITE */
+static char display_mode_video_cmd_2[2] = {0xC2, 0x00}; /* DTYPE_DCS_WRITE */
+
+static struct dsi_cmd_desc video_to_cmd[] = {
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 20,
+		sizeof(display_mode_video_cmd_1), display_mode_video_cmd_1},
+	{DTYPE_DCS_WRITE1, 1, 0, 0, 1,
+		sizeof(display_mode_video_cmd_2), display_mode_video_cmd_2},
+};
+
+static struct dsi_cmd_desc cmd_to_video[] = {
+	{DTYPE_DCS_LWRITE, 1, 0, 0, 0,
+		sizeof(display_mode_video), display_mode_video},
+};
+
+static void disable_video_mode_clk(void)
+{
+	/* Turn off video mode operation */
+	MDP_OUTP(MDP_BASE + DSI_VIDEO_BASE, 0);
+	MIPI_OUTP(MIPI_DSI_BASE + 0x0000, 0x175);
+}
+
+static void enable_video_mode_clk(void)
+{
+	/* Turn on video mode operation */
+	MIPI_OUTP(MIPI_DSI_BASE + 0x0000, 0x173);
+	MDP_OUTP(MDP_BASE + DSI_VIDEO_BASE, 1);
+}
+
+static DECLARE_WAIT_QUEUE_HEAD(jet_vsync_wait);
+static unsigned int vsync_irq;
+static int wait_vsync = 0;
+static int jet_vsync_gpio = 0;
+static int jet_irq_cnt = 0;    /* irq trigger trace */
+
+static irqreturn_t jet_vsync_interrupt(int irq, void *data)
+{
+	jet_irq_cnt++;
+	if (wait_vsync) {
+		PR_DISP_DEBUG("Wait vsync\n");
+		jet_vsync_gpio = 1;
+		wake_up(&jet_vsync_wait);
+		wait_vsync = 0;
+	}
+
+	return IRQ_HANDLED;
+}
+
+static int setup_vsync(struct platform_device *pdev, int init)
+{
+	int ret;
+	int gpio = 0;
+
+	PR_DISP_INFO("%s+++\n", __func__);
+
+	if (!init) {
+		ret = 0;
+		goto uninit;
+	}
+	ret = gpio_request(gpio, "vsync");
+	if (ret)
+		goto err_request_gpio_failed;
+
+	ret = gpio_direction_input(gpio);
+	if (ret)
+		goto err_gpio_direction_input_failed;
+
+	ret = vsync_irq = gpio_to_irq(gpio);
+	if (ret < 0)
+		goto err_get_irq_num_failed;
+
+	ret = request_irq(vsync_irq, jet_vsync_interrupt, IRQF_TRIGGER_RISING,
+			  "vsync", pdev);
+	if (ret)
+		goto err_request_irq_failed;
+	PR_DISP_INFO("vsync on gpio %d now %d\n",
+	       gpio, gpio_get_value(gpio));
+	disable_irq(vsync_irq);
+
+	PR_DISP_INFO("%s---\n", __func__);
+	return 0;
+
+uninit:
+	free_irq(gpio_to_irq(gpio), pdev);
+err_request_irq_failed:
+err_get_irq_num_failed:
+err_gpio_direction_input_failed:
+	gpio_free(gpio);
+err_request_gpio_failed:
+	return ret;
+}
+#endif
 static char disable_dim_cmd[2] = {0x53, 0x24};/* DTYPE_DCS_WRITE1 */
 static struct dsi_cmd_desc disable_dim[] = {{DTYPE_DCS_WRITE1, 1, 0, 0, 0, sizeof(disable_dim_cmd), disable_dim_cmd},};
 #ifdef CONFIG_FB_MSM_CABC
@@ -2852,6 +2952,45 @@ static unsigned char jet_shrink_pwm(int val)
 
 	return shrink_br;
 }
+
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+static void jet_self_refresh_switch(int on)
+{
+	int vsync_timeout;
+
+	if (on) {
+		PR_DISP_DEBUG("[SR] %s on\n", __func__);
+		mipi_set_tx_power_mode(0);
+		mipi_dsi_cmds_tx(&jet_panel_tx_buf, video_to_cmds,
+			video_to_cmds_cnt);
+		mipi_set_tx_power_mode(1);
+		disable_video_mode_clk();
+	} else {
+		PR_DISP_DEBUG("[SR] %s off\n", __func__);
+		jet_irq_cnt = 0;
+		mipi_set_tx_power_mode(0);
+		enable_irq(vsync_irq);
+		wait_vsync = 1;
+		vsync_timeout = wait_event_timeout(jet_vsync_wait, jet_vsync_gpio ||
+					gpio_get_value(0), HZ/2);
+
+		jet_vsync_gpio = 0;
+		mipi_dsi_cmds_tx(&jet_panel_tx_buf, cmd_to_videos,
+			cmd_to_videos_cnt);
+		wait_vsync = 1;
+		vsync_timeout = wait_event_timeout(jet_vsync_wait, jet_vsync_gpio ||
+					gpio_get_value(0), HZ/2);
+		if (jet_irq_cnt > 2)
+			PR_DISP_DEBUG("[SR] vsync_count:%d\n", jet_irq_cnt);
+		mipi_dsi_sw_reset();
+		enable_video_mode_clk();
+		disable_irq(vsync_irq);
+		jet_vsync_gpio = 0;
+		if (vsync_timeout == 0)
+			PR_DISP_DEBUG("Lost vsync!\n");
+	}
+}
+#endif
 
 static int mipi_lcd_on = 1;
 
@@ -2969,6 +3108,16 @@ static void jet_set_backlight(struct msm_fb_data_type *mfd)
 
 static int __devinit jet_lcd_probe(struct platform_device *pdev)
 {
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+	int ret;
+	mipi_jet_pdata = pdev->dev.platform_data;
+
+	ret = setup_vsync(pdev, 1);
+	if (ret) {
+		dev_err(&pdev->dev, "mipi_jet_setup_vsync failed\n");
+		return ret;
+	}
+#endif
 	msm_fb_add_device(pdev);
 
 	return 0;
@@ -2993,6 +3142,9 @@ static struct msm_fb_panel_data jet_panel_data = {
 	.on		= jet_lcd_on,
 	.off		= jet_lcd_off,
 	.set_backlight = jet_set_backlight,
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+	.self_refresh_switch = jet_self_refresh_switch,
+#endif
 #ifdef CONFIG_FB_MSM_CABC
 	.enable_cabc = enable_ic_cabc,
 #endif
@@ -3065,14 +3217,14 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.type = MIPI_CMD_PANEL;
 	pinfo.mipi.mode = DSI_CMD_MODE;
 	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
-	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;*/
+	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6296; /* adjust refx100 to prevent tearing */
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
@@ -3105,15 +3257,15 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
 
-	pinfo.lcdc.h_back_porch = 104;	/* 660Mhz: 116 */
-	pinfo.lcdc.h_front_porch = 95;	/* 660Mhz: 184 */
-	pinfo.lcdc.h_pulse_width = 1;	/* 660Mhz: 24 */
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
 	pinfo.lcdc.v_pulse_width = 1;
 
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
 
 	pinfo.lcdc.border_clr = 0;	/* blk */
@@ -3126,7 +3278,7 @@ static int mipi_video_auo_hd720p_init(void)
 	/*pinfo.clk_rate = 742500000;*/
 	/*pinfo.clk_rate = 569000000;*/
 	/*pinfo.clk_rate = 482000000;*/
-	pinfo.clk_rate = 482000000;
+	pinfo.clk_rate = 507000000;
 
 	pinfo.mipi.vc = 0;
 	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
@@ -3134,13 +3286,12 @@ static int mipi_video_auo_hd720p_init(void)
 	pinfo.mipi.data_lane1 = TRUE;
 	pinfo.mipi.data_lane2 = TRUE;
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;	/* 660Mhz: 10 */
-	pinfo.mipi.t_clk_pre = 0x21;	/* 660Mhz: 30 */
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
 	pinfo.mipi.stream = 0;	/* dma_p */
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-
 
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
@@ -3189,6 +3340,13 @@ static int mipi_video_auo_hd720p_init(void)
 	cmd_backlight_cmds = cmd_bkl_cmds;
 	cmd_backlight_cmds_count = ARRAY_SIZE(cmd_bkl_cmds);
 
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+	video_to_cmds = video_to_cmd;
+	cmd_to_videos = cmd_to_video;
+	video_to_cmds_cnt	= ARRAY_SIZE(video_to_cmd);
+	cmd_to_videos_cnt = ARRAY_SIZE(cmd_to_video);
+#endif
+
 	return ret;
 }
 
@@ -3202,14 +3360,14 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.type = MIPI_CMD_PANEL;
 	pinfo.mipi.mode = DSI_CMD_MODE;
 	pinfo.mipi.dst_format = DSI_CMD_DST_FORMAT_RGB888;
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
-	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;*/
+	/*pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;*/
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 #ifdef CONFIG_FB_MSM_SELF_REFRESH
 	jet_panel_data.self_refresh_switch = NULL; /* CMD or VIDEO mode only */
 #endif
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+	pinfo.lcd.refx100 = 6296; /* adjust refx100 to prevent tearing */
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
@@ -3245,15 +3403,15 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
 
-	pinfo.lcdc.h_back_porch = 104;
-	pinfo.lcdc.h_front_porch = 95;
-	pinfo.lcdc.h_pulse_width = 1;
-	pinfo.lcdc.v_back_porch = 2;
-	pinfo.lcdc.v_front_porch = 6;
+	pinfo.lcdc.h_back_porch = 160;
+	pinfo.lcdc.h_front_porch = 160;
+	pinfo.lcdc.h_pulse_width = 8;
+	pinfo.lcdc.v_back_porch = 32;
+	pinfo.lcdc.v_front_porch = 32;
 	pinfo.lcdc.v_pulse_width = 1;
 
-	pinfo.lcd.v_back_porch = 2;
-	pinfo.lcd.v_front_porch = 6;
+	pinfo.lcd.v_back_porch = 32;
+	pinfo.lcd.v_front_porch = 32;
 	pinfo.lcd.v_pulse_width = 1;
 
 	pinfo.lcdc.border_clr = 0;	/* blk */
@@ -3266,7 +3424,7 @@ static int mipi_video_sony_hd720p_init(void)
 	/*pinfo.clk_rate = 742500000;*/
 	/*pinfo.clk_rate = 569000000;*/
 	/*pinfo.clk_rate = 482000000;*/
-	pinfo.clk_rate = 482000000;
+	pinfo.clk_rate = 507000000;
 
 	pinfo.mipi.vc = 0;
 	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_RGB;
@@ -3274,14 +3432,12 @@ static int mipi_video_sony_hd720p_init(void)
 	pinfo.mipi.data_lane1 = TRUE;
 	pinfo.mipi.data_lane2 = TRUE;
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x10;
-	pinfo.mipi.t_clk_pre = 0x21;
+	pinfo.mipi.t_clk_post = 0x04;
+	pinfo.mipi.t_clk_pre = 0x1e;
 	pinfo.mipi.stream = 0;	/* dma_p */
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &nova_dsi_video_mode_phy_db;
-	pinfo.mipi.esc_byte_ratio = 4;
-
 
 	ret = mipi_jet_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_WVGA_PT);
@@ -3319,6 +3475,13 @@ static int mipi_video_sony_hd720p_init(void)
 
 	cmd_backlight_cmds = cmd_bkl_cmds;
 	cmd_backlight_cmds_count = ARRAY_SIZE(cmd_bkl_cmds);
+
+#if defined CONFIG_FB_MSM_SELF_REFRESH
+	video_to_cmds = video_to_cmd;
+	cmd_to_videos = cmd_to_video;
+	video_to_cmds_cnt	= ARRAY_SIZE(video_to_cmd);
+	cmd_to_videos_cnt = ARRAY_SIZE(cmd_to_video);
+#endif
 
 	return ret;
 }
