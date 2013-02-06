@@ -1,4 +1,4 @@
-CFLAGS_Yushan_API.o += -O2
+
 
 GCC_VERSION      := $(shell $(CONFIG_SHELL) $(PWD)/scripts/gcc-version.sh $(CROSS_COMPILE)gcc)
 obj-$(CONFIG_RAWCHIP) += rawchip_spi.o rawchip.o Yushan_API.o Yushan_Platform_Specific.o Yushan_HTC_Functions.o
