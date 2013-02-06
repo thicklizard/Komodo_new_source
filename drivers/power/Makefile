@@ -1,7 +1,4 @@
 ccflags-$(CONFIG_POWER_SUPPLY_DEBUG) := -DDEBUG
-CFLAGS_pm8xxx-ccadc.o += -O2
-CFLAGS_pm8921-bms.o += -O2
-CFLAGS_pm8921-charger-htc.o += -O2
 
 power_supply-y				:= power_supply_core.o
 power_supply-$(CONFIG_SYSFS)		+= power_supply_sysfs.o
