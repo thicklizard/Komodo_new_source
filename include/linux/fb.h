@@ -273,7 +273,7 @@ struct fb_var_screeninfo {
 	__u32 sync;			/* see FB_SYNC_*		*/
 	__u32 vmode;			/* see FB_VMODE_*		*/
 	__u32 rotate;			/* angle we rotate counter clockwise */
-	__u32 reserved[4];              /* Reserved for future compatibility */
+	__u32 reserved[5];		/* Reserved for future compatibility */
 };
 
 struct fb_cmap {
@@ -1169,6 +1169,16 @@ extern int fb_find_mode(struct fb_var_screeninfo *var,
 			unsigned int dbsize,
 			const struct fb_videomode *default_mode,
 			unsigned int default_bpp);
+
+struct gamma_curvy {
+	u32 gamma_len;
+	u32 bl_len;
+	u32 ref_y_gamma[33];
+	u32 ref_y_shade[33];
+	u32 ref_bl_lvl[8];
+	u32 ref_y_lvl[8];
+	struct fb_cmap gc_tbl;
+};
 
 #endif /* __KERNEL__ */
 

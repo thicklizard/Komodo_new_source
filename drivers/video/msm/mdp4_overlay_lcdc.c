@@ -172,6 +172,8 @@ int mdp4_lcdc_pipe_commit(int cndx, int wait)
 	pipe = vctrl->base_pipe;
 	mixer = pipe->mixer_num;
 
+	mdp_update_pm(vctrl->mfd, vctrl->vsync_time);
+
 	/*
 	 * allow stage_commit without pipes queued
 	 * (vp->update_cnt == 0) to unstage pipes after
@@ -558,19 +560,17 @@ int mdp4_lcdc_on(struct platform_device *pdev)
 	pipe->src_x = 0;
 	pipe->dst_h = fbi->var.yres;
 	pipe->dst_w = fbi->var.xres;
-	if (mfd->map_buffer) {
-		pipe->srcp0_addr = (unsigned int)mfd->map_buffer->iova[0] + \
-			buf_offset;
-		pr_debug("start 0x%lx srcp0_addr 0x%x\n", mfd->
-			map_buffer->iova[0], pipe->srcp0_addr);
-	} else {
+
+	if (mfd->display_iova)
+		pipe->srcp0_addr = mfd->display_iova + buf_offset;
+	else
 		pipe->srcp0_addr = (uint32)(buf + buf_offset);
-	}
 
 	pipe->srcp0_ystride = fbi->fix.line_length;
 	pipe->bpp = bpp;
 
 	mdp4_overlay_mdp_pipe_req(pipe, mfd);
+	mdp4_calc_blt_mdp_bw(mfd, pipe);
 
 	atomic_set(&vctrl->suspend, 0);
 
@@ -706,10 +706,15 @@ int mdp4_lcdc_off(struct platform_device *pdev)
 
 	lcdc_enabled = 0;
 
-        if (vctrl->vsync_irq_enabled) {
-            vctrl->vsync_irq_enabled = 0;
-            vsync_irq_disable(INTR_PRIMARY_VSYNC, MDP_PRIM_VSYNC_TERM);
-        }
+	undx =  vctrl->update_ndx;
+	vp = &vctrl->vlist[undx];
+	if (vp->update_cnt) {
+		/*
+		 * pipe's iommu will be freed at next overlay play
+		 * and iommu_drop statistic will be increased by one
+		 */
+		vp->update_cnt = 0;     /* empty queue */
+	}
 
 	undx =  vctrl->update_ndx;
 	vp = &vctrl->vlist[undx];
@@ -954,8 +959,7 @@ void mdp4_lcdc_overlay(struct msm_fb_data_type *mfd)
 	uint8 *buf;
 	unsigned int buf_offset;
 	int bpp;
-	int cndx = 0;
-        int cnt;
+	int cnt, cndx = 0;
 	struct vsycn_ctrl *vctrl;
 	struct mdp4_overlay_pipe *pipe;
 
@@ -976,10 +980,9 @@ void mdp4_lcdc_overlay(struct msm_fb_data_type *mfd)
 		buf = (uint8 *) fbi->fix.smem_start;
 		buf_offset = calc_fb_offset(mfd, fbi, bpp);
 
-		if (mfd->map_buffer->iova[0]) {
-			pipe->srcp0_addr = mfd->map_buffer->iova[0]
-				+ buf_offset;
-		} else
+		if (mfd->display_iova)
+			pipe->srcp0_addr = mfd->display_iova + buf_offset;
+		else
 			pipe->srcp0_addr = (uint32)(buf + buf_offset);
 
 		mdp4_lcdc_pipe_queue(0, pipe);
