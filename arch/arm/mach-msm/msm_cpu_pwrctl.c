@@ -41,3 +41,4 @@ done:
 }
 
 early_initcall(msm_cpu_pwrctl_init);
+
