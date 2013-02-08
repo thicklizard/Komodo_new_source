@@ -22,7 +22,7 @@
 #include "../board-jet.h"
 
 /* Select panel operate mode : CMD, VIDEO or SWITCH mode */
-#undef JEL_CMD_MODE_PANEL
+#define JEL_CMD_MODE_PANEL
 #undef JEL_VIDEO_MODE_PANEL
 #undef JEL_SWITCH_MODE_PANEL
 
