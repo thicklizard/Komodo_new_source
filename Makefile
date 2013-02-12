@@ -400,17 +400,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 \
 		   -mfpu=neon  
 KBUILD_AFLAGS_KERNEL :=
-<<<<<<< HEAD
-KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
-KBUILD_AFLAGS   := -D__ASSEMBLY__
-KBUILD_AFLAGS_MODULE  := -DMODULE
-KBUILD_CFLAGS_MODULE  := -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
-=======
-KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a15 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
-KBUILD_AFLAGS := -D__ASSEMBLY__
-KBUILD_AFLAGS_MODULE := -DMODULE
-KBUILD_CFLAGS_MODULE  := -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a15 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
->>>>>>> 085b8a3... fix error i made on last commit
+
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
@@ -756,7 +746,11 @@ export mod_strip_cmd
 
 
 ifeq ($(KBUILD_EXTMOD),)
+<<<<<<< HEAD
 core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/
+=======
+core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/ 
+>>>>>>> f3f3f64... add command line for scheduler
 
 vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \
 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
