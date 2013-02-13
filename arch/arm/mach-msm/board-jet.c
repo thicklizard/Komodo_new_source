@@ -136,6 +136,17 @@
 	int set_kgsl_2d0_freq(unsigned int freq);
 	int set_kgsl_2d1_freq(unsigned int freq);
 #endif
+	
+#ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
+int set_two_phase_freq(int cpufreq);
+#endif
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_2_PHASE
+int set_two_phase_freq_badass(int cpufreq);
+#endif
+#ifdef CONFIG_CPU_FREQ_GOV_BADASS_3_PHASE
+int set_three_phase_freq_badass(int cpufreq);
+#endif
+
 
 #define HW_VER_ID_VIRT		(MSM_TLMM_BASE + 0x00002054)
 
