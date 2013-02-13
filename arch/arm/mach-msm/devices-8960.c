@@ -2690,11 +2690,19 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 		 {
 			.gpu_freq = 177778000,
 			.bus_freq = 0,
+<<<<<<< HEAD
 		 },
 		 },
 	.init_level = 1,
 	.max_level = 2,
 	.num_levels = 5,
+=======
+		},
+	},
+	.init_level = 2,
+	.num_levels = 5,
+	.max_level= 6,
+>>>>>>> 085b8a3... fix error i made on last commit
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/12,
 	.nap_allowed = false,
@@ -2755,8 +2763,12 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
  			.bus_freq = 0,
 		},
 	},
+<<<<<<< HEAD
 	.init_level = 1,
 	.max_level = 2,
+=======
+	.init_level = 0,
+>>>>>>> 085b8a3... fix error i made on last commit
 	.num_levels = 5,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/12,
@@ -2818,8 +2830,13 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
  			.bus_freq = 0,
 		},
 	},
+<<<<<<< HEAD
 	.init_level = 1,
 	.max_level = 2,
+=======
+	.init_level = 0,
+	.max_level=1,
+>>>>>>> 085b8a3... fix error i made on last commit
 	.num_levels = 5,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/12,
