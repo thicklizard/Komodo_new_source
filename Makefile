@@ -371,9 +371,7 @@ LINUXINCLUDE    := -I$(srctree)/arch/$(hdr-arch)/include \
                    $(if $(KBUILD_SRC), -I$(srctree)/include) \
                    -include include/generated/autoconf.h
 
-KBUILD_CPPFLAGS := -D__KERNEL__ -Wno-unused-but-set-variable \
- -Wno-error=unused-value -Wno-error=switch -Wno-error=uninitialized -Wno-error=address \
- -Wno-error=enum-compare -Wno-error=parentheses -Wno-error=array-bounds -Wno-unused-variable
+KBUILD_CPPFLAGS := -D__KERNEL__ 
 
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
@@ -384,10 +382,10 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a15 \
 		   -mfpu=neon 		   
 KBUILD_AFLAGS_KERNEL :=
-KBUILD_CFLAGS_KERNEL :=
+KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funroll-loops
 KBUILD_AFLAGS := -D__ASSEMBLY__
 KBUILD_AFLAGS_MODULE := -DMODULE
-KBUILD_CFLAGS_MODULE := -DMODULE
+KBUILD_CFLAGS_MODULE  := -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a8 -march=armv7-a -mfpu=neon -ftree-vectorize -funroll-loops
 KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
