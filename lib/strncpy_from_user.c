@@ -102,12 +102,12 @@ long strncpy_from_user(char *dst, const char __user *src, long count)
 	if (unlikely(count <= 0))
 		return 0;
 
-	max_addr = user_addr_max(;
+	max_addr = user_addr_max();
 	src_addr = (unsigned long)src;
 	if (likely(src_addr < max_addr)) {
 		unsigned long max = max_addr - src_addr;
 		return do_strncpy_from_user(dst, src, count, max);
 	}
-	return -EFAULT
+	return -EFAULT;
 }
 EXPORT_SYMBOL(strncpy_from_user);
