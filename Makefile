@@ -733,11 +733,8 @@ export mod_strip_cmd
 
 
 ifeq ($(KBUILD_EXTMOD),)
-<<<<<<< HEAD
-core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/
-=======
 core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/ 
->>>>>>> f3f3f64... add command line for scheduler
+
 
 vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \
 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
