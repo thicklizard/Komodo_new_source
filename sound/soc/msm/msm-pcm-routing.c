@@ -898,6 +898,12 @@ static const struct snd_kcontrol_new mmul1_mixer_controls[] = {
 	SOC_SINGLE_EXT("VOC_REC_UL", MSM_BACKEND_DAI_INCALL_RECORD_TX,
 		MSM_FRONTEND_DAI_MULTIMEDIA1, 1, 0, msm_routing_get_audio_mixer,
 		msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("VOC_REC_DL", MSM_BACKEND_DAI_INCALL_RECORD_RX,
+		MSM_FRONTEND_DAI_MULTIMEDIA4, 1, 0, msm_routing_get_audio_mixer,
+		msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("VOC_REC_UL", MSM_BACKEND_DAI_INCALL_RECORD_TX,
+ 		MSM_FRONTEND_DAI_MULTIMEDIA4, 1, 0, msm_routing_get_audio_mixer,
+		msm_routing_put_audio_mixer),
 };
 
 static const struct snd_kcontrol_new mmul2_mixer_controls[] = {
@@ -1407,6 +1413,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 
 	{"MultiMedia1 Mixer", "VOC_REC_UL", "INCALL_RECORD_TX"},
 	{"MultiMedia1 Mixer", "VOC_REC_DL", "INCALL_RECORD_RX"},
+	{"MultiMedia4 Mixer", "VOC_REC_UL", "INCALL_RECORD_TX"},
+	{"MultiMedia4 Mixer", "VOC_REC_DL", "INCALL_RECORD_RX"},
 	{"MI2S_RX Audio Mixer", "MultiMedia1", "MM_DL1"},
 	{"MI2S_RX Audio Mixer", "MultiMedia2", "MM_DL2"},
 	{"MI2S_RX Audio Mixer", "MultiMedia3", "MM_DL3"},
