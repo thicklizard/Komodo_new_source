@@ -1,7 +1,7 @@
 /*
  * arch/arm/kernel/topology.c
  *
- * Copyright (C) 2011 Linaro Limited.
+ * Copyright (C) 2012 Linaro Limited.
  * Written by: Vincent Guittot
  *
  * based on arch/sh/kernel/topology.c
@@ -11,14 +11,22 @@
  * for more details.
  */
 
-#include <linux/init.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-#include <linux/cpu.h>
-#include <linux/sched.h>
 #include <linux/notifier.h>
 #include <linux/cpufreq.h>
+#include <linux/node.h>
+#include <linux/percpu.h>
 #include <linux/power/cpupower.h>
+#include <linux/cpu.h>
+#include <linux/init.h>
+#include <linux/nodemask.h>
+#include <linux/sched.h>
+#include <linux/cpumask.h>
+#include <linux/cpuset.h>
+
+#include <asm/cputype.h>
+#include <asm/topology.h>
 
 static struct cputopo_power **table_config = NULL;
 
@@ -45,6 +53,7 @@ static void set_cpufreq_scale(unsigned int cpuid, unsigned int freq)
 	if (idx >= cpu_power[cpuid].power->max)
 		idx = cpu_power[cpuid].power->max - 1;
 
+	set_power_scale(cpuid, cpu_power[cpuid].power->table[idx]);
 	smp_wmb();
 }
 
@@ -125,23 +134,25 @@ static int topo_policy_transition(struct notifier_block *nb,
 	return NOTIFY_OK;
 }
 
- static struct notifier_block topo_policy_nb = {
-  	.notifier_call = topo_policy_transition,
- };
+static struct notifier_block topo_policy_nb = {
+	.notifier_call = topo_policy_transition,
+};
 
 static int __devinit cpupower_probe(struct platform_device *pdev)
 {
 	topo_cpufreq_init(pdev);
 
 	/* register cpufreq notifer */
-	
+	topology_register_notifier(&topo_policy_nb);
+
 	return 0;
 }
 
 static int __devexit cpupower_remove(struct platform_device *pdev)
 {
 	/* unregister cpufreq notifer */
-	
+	topology_unregister_notifier(&topo_policy_nb);
+
 	topo_cpufreq_exit(pdev);
 
 	return 0;
