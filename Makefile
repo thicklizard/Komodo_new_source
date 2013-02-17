@@ -378,9 +378,12 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
+		   -marm -march=armv7-a  \
+		   -mcpu=cortex-a9 -mfpu=vfp3 \
+		   -fsched-spec-load -floop-interchange -floop-strip-mine -floop-block \
 		   -ffast-math \
-		   -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a15 \
-		   -mfpu=neon 		   
+		   -funswitch-loops -fpredictive-commoning -fgcse-after-reload \
+		   -fipa-cp-clone -pipe		   
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL := -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math -fsingle-precision-constant -mtune=cortex-a15 -march=armv7-a -mfpu=neon -ftree-vectorize -funswitch-loops
 KBUILD_AFLAGS := -D__ASSEMBLY__

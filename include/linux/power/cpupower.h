@@ -1,7 +1,7 @@
 /*
  * cpupower.h
  *
- * Copyright (c) 2011 Vincent Guittot <vincent.guittot@linaro.org>
+ * Copyright (c) 2012 Vincent Guittot <vincent.guittot@linaro.org>
  *
  * This file is released under the GPLv2
  *
@@ -20,3 +20,4 @@ struct cputopo_power {
 };
 
 #endif
+
