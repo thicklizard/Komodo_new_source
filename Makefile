@@ -378,8 +378,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
-		   -marm -march=armv7-a  \
-		   -mcpu=cortex-a15 \
+		   -marm   \
 		   -ffast-math \
 		   -pipe		   
 KBUILD_AFLAGS_KERNEL :=
