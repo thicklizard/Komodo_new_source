@@ -1514,6 +1514,30 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"INTERNAL_BT_SCO_RX Port Mixer", "AUX_PCM_UL_TX", "AUX_PCM_TX"},
 	{"INT_BT_SCO_RX", NULL, "INTERNAL_BT_SCO_RX Port Mixer"},
 //hTC---
+
+		/* Backend Enablement */
+
+	{"BE_OUT", NULL, "PRI_I2S_RX"},
+	{"BE_OUT", NULL, "SEC_I2S_RX"},
+	{"BE_OUT", NULL, "SLIMBUS_0_RX"},
+	{"BE_OUT", NULL, "HDMI"},
+	{"BE_OUT", NULL, "MI2S_RX"},
+	{"PRI_I2S_TX", NULL, "BE_IN"},
+	{"MI2S_TX", NULL, "BE_IN"},
+	{"SLIMBUS_0_TX", NULL, "BE_IN" },
+	{"BE_OUT", NULL, "INT_BT_SCO_RX"},
+	{"INT_BT_SCO_TX", NULL, "BE_IN"},
+	{"BE_OUT", NULL, "INT_FM_RX"},
+	{"INT_FM_TX", NULL, "BE_IN"},
+	{"BE_OUT", NULL, "PCM_RX"},
+	{"PCM_TX", NULL, "BE_IN"},
+	{"BE_OUT", NULL, "SLIMBUS_3_RX"},
+	{"BE_OUT", NULL, "STUB_RX"},
+	{"STUB_TX", NULL, "BE_IN"},
+	{"BE_OUT", NULL, "SEC_AUX_PCM_RX"},
+	{"SEC_AUX_PCM_TX", NULL, "BE_IN"},
+	{"BE_OUT", NULL, "AUX_PCM_RX"},
+	{"AUX_PCM_TX", NULL, "BE_IN"},
 };
 
 static int msm_pcm_routing_hw_params(struct snd_pcm_substream *substream,
