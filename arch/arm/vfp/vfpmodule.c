@@ -20,7 +20,6 @@
 #include <linux/init.h>
 
 #include <asm/cputype.h>
-#include <asm/system_info.h>
 #include <asm/thread_notify.h>
 #include <asm/vfp.h>
 
@@ -608,6 +607,7 @@ static int __init vfp_init(void)
 		 * in place; report VFP support to userspace.
 		 */
 		elf_hwcap |= HWCAP_VFP;
+#ifdef CONFIG_VFPv3
 		if (VFP_arch >= 2) {
 			elf_hwcap |= HWCAP_VFPv3;
 
@@ -621,6 +621,7 @@ static int __init vfp_init(void)
 			else
 				elf_hwcap |= HWCAP_VFPD32;
 		}
+#endif
 		/*
 		 * Check for the presence of the Advanced SIMD
 		 * load/store instructions, integer and single
