@@ -1,3 +1,5 @@
+CFLAGS_mdp.o += -O2
+
 obj-y := msm_fb.o
 
 CFLAGS_external_common.o += -O2
