@@ -1,3 +1,5 @@
+CFLAGS_mdp.o += -O2
+
 obj-y := msm_fb.o
 
 obj-$(CONFIG_FB_MSM_LOGO) += logo.o
