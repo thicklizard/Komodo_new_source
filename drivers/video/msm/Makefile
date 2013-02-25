@@ -1,4 +1,3 @@
-CFLAGS_mdp.o += -O2
 
 obj-y := msm_fb.o
 
