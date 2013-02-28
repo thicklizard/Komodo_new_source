@@ -966,3 +966,4 @@ static int __init ville_panel_late_init(void)
 
 module_init(ville_panel_init);
 late_initcall(ville_panel_late_init);
+

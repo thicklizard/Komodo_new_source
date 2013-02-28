@@ -366,8 +366,8 @@ enum {
 
 #define MSM_PMEM_ADSP_SIZE         0x6600000 /* Need to be multiple of 64K */
 #define MSM_PMEM_AUDIO_SIZE        0x4CF000
-#define MSM_PMEM_SIZE 0x04000000 /* 64 Mbytes */
-#define MSM_LIQUID_PMEM_SIZE 0x4000000 /* 64 Mbytes */
+#define MSM_PMEM_SIZE 0x05000000 /* 80 Mbytes */
+#define MSM_LIQUID_PMEM_SIZE 0x5000000 /* 80 Mbytes */
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x65000
@@ -2820,7 +2820,7 @@ static struct msm_bus_scale_pdata mdp_bus_scale_pdata = {
 
 static struct msm_panel_common_pdata mdp_pdata = {
 	.gpio = VILLE_GPIO_LCD_TE,
-	.mdp_max_clk = 200000000,
+	.mdp_max_clk = 266667000,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
 #endif

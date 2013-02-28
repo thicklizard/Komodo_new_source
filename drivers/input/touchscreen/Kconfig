@@ -216,6 +216,11 @@ config TOUCHSCREEN_CYPRESS_CS
 	  Say Y here if you have cap sensor on your device
 	  If unsure, say N.
 
+config TOUCHSCREEN_CYPRESS_SWEEP2WAKE
+        tristate "Sweep2Wake for Cypress CS touchscreens"
+        depends on TOUCHSCREEN_CYPRESS_CS
+        default n
+
 config TOUCH_KEY_FILTER
 	tristate "Virtualkey and TouchScreen Filter"
 	depends on TOUCHSCREEN_CYPRESS_CS
@@ -477,13 +482,6 @@ config TOUCHSCREEN_SYNAPTICS_I2C_RMI
 	depends on I2C
 	help
 	  This enables support for Synaptics RMI over I2C based touchscreens.
-
-config TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-	tristate "Sweep2Wake for SYNAPTICS_3k based touchscreens"
-	 help 
-	   Say Y here if you want to use sweep2wake.
-	
-	   If unsure, say Y.
 
 config TOUCHSCREEN_SYNAPTICS_3K
         tristate "Synaptics 3k serious i2c touchscreen"

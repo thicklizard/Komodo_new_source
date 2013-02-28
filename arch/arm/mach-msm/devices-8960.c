@@ -2560,7 +2560,11 @@ static struct msm_bus_vectors grp3d_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(2400),  //300 MHz GPU
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(2048),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2569,7 +2573,11 @@ static struct msm_bus_vectors grp3d_nominal_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(3200),  //400 MHz GPU
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(2656),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2587,7 +2595,7 @@ static struct msm_bus_vectors grp3d_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(5290),
+		.ib = KGSL_CONVERT_TO_MBPS(4264),
 	},
 };
 
@@ -2634,7 +2642,11 @@ static struct msm_bus_vectors grp2d0_nominal_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE0,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(2400),  //300 MHz 
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(1000),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2643,7 +2655,11 @@ static struct msm_bus_vectors grp2d0_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE0,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(2560),  //320MHz GPU = 2400 Mbps
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(2048),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2682,7 +2698,11 @@ static struct msm_bus_vectors grp2d1_nominal_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE1,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(2400),  //300 MHz GPU
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(1000),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2691,7 +2711,11 @@ static struct msm_bus_vectors grp2d1_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE1,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
+<<<<<<< HEAD
 		.ib = KGSL_CONVERT_TO_MBPS(2560),  //320MHz GPU = 2400 Mbps
+=======
+		.ib = KGSL_CONVERT_TO_MBPS(2048),
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	},
 };
 
@@ -2929,7 +2953,11 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 	.max_level= 2,
 	.num_levels = 5,
 	.set_grp_async = NULL,
+<<<<<<< HEAD
 	.idle_timeout = HZ/5,
+=======
+	.idle_timeout = HZ/12,
+>>>>>>> a07ff5d813f54eeec8bf25a5441589477e101aa9
 	.nap_allowed = true,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
@@ -3413,3 +3441,4 @@ struct platform_device msm8960_iommu_domain_device = {
 		.platform_data = &msm8960_iommu_domain_pdata,
 	},
 };
+

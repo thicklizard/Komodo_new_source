@@ -3224,7 +3224,11 @@ static int mipi_video_auo_hd720p_init(void)
 #endif
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+<<<<<<< HEAD
+	pinfo.lcd.refx100 = 6296; /* adjust refx100 to prevent tearing */
+=======
+	pinfo.lcd.refx100 = 6650; /* adjust refx100 to prevent tearing */
+>>>>>>> 14d1e2f... jewel: adjust refx100 to 6650.
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
@@ -3366,7 +3370,11 @@ static int mipi_video_sony_hd720p_init(void)
 #endif
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6096; /* adjust refx100 to prevent tearing */
+<<<<<<< HEAD
+	pinfo.lcd.refx100 = 6296; /* adjust refx100 to prevent tearing */
+=======
+	pinfo.lcd.refx100 = 6650; /* adjust refx100 to prevent tearing */
+>>>>>>> 14d1e2f... jewel: adjust refx100 to 6650.
 	pinfo.mipi.te_sel = 1; /* TE from vsycn gpio */
 	pinfo.mipi.interleave_max = 1;
 	pinfo.mipi.insert_dcs_cmd = TRUE;
