@@ -828,4 +828,4 @@ void msm_mpdec_exit(void)
 	destroy_workqueue(msm_mpdec_workq);
 }
 
-MODULE_DESCRIPTION("Kernel based MPDECISION");
+MODULE_DESCRIPTION("Kernel based MPDECISION (C) 2011-13 Chad Goodman");
