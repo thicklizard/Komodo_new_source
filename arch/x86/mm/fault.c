@@ -720,31 +720,12 @@ __bad_area_nosemaphore(struct pt_regs *regs, unsigned long error_code,
 		if (is_errata100(regs, address))
 			return;
 
-<<<<<<< HEAD
 		if (unlikely(show_unhandled_signals))
-=======
-#ifdef CONFIG_X86_64
-		/*
-		 * Instruction fetch faults in the vsyscall page might need
-		 * emulation.
-		 */
-		if (unlikely((error_code & PF_INSTR) &&
-			     ((address & ~0xfff) == VSYSCALL_START))) {
-			if (emulate_vsyscall(regs, address))
-				return;
-		}
-#endif
-
-		/* Kernel addresses are always protection faults: */
-		if (address >= TASK_SIZE)
-			error_code |= PF_PROT;
-
-		if (likely(show_unhandled_signals))
->>>>>>> 48af159... + patch -p1 < patch-3.0.67-68
 			show_signal_msg(regs, error_code, address, tsk);
 
+		/* Kernel addresses are always protection faults: */
 		tsk->thread.cr2		= address;
-		tsk->thread.error_code	= error_code;
+		tsk->thread.error_code	= error_code | (address >= TASK_SIZE);
 		tsk->thread.trap_no	= 14;
 
 		force_sig_info_fault(SIGSEGV, si_code, address, tsk, 0);

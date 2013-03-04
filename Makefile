@@ -1,15 +1,8 @@
 VERSION = 3
-<<<<<<< HEAD
 PATCHLEVEL = 0
 SUBLEVEL = 67
 EXTRAVERSION =
 
-=======
-PATCHLEVEL = 1
-SUBLEVEL = 0
-EXTRAVERSION = -R68
-NAME = "Divemaster Edition"
->>>>>>> 48af159... + patch -p1 < patch-3.0.67-68
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
