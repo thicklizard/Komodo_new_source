@@ -301,17 +301,11 @@ int kvm_arch_vcpu_setup(struct kvm_vcpu *vcpu)
 struct kvm_vcpu *kvm_arch_vcpu_create(struct kvm *kvm,
 				      unsigned int id)
 {
-	struct kvm_vcpu *vcpu;
-	int rc = -EINVAL;
+	struct kvm_vcpu *vcpu = kzalloc(sizeof(struct kvm_vcpu), GFP_KERNEL);
+	int rc = -ENOMEM;
 
-	if (id >= KVM_MAX_VCPUS)
-		goto out;
-
-	rc = -ENOMEM;
-
-	vcpu = kzalloc(sizeof(struct kvm_vcpu), GFP_KERNEL);
 	if (!vcpu)
-		goto out;
+		goto out_nomem;
 
 	vcpu->arch.sie_block = (struct kvm_s390_sie_block *)
 					get_zeroed_page(GFP_KERNEL);
@@ -347,7 +341,7 @@ out_free_sie_block:
 	free_page((unsigned long)(vcpu->arch.sie_block));
 out_free_cpu:
 	kfree(vcpu);
-out:
+out_nomem:
 	return ERR_PTR(rc);
 }
 
@@ -590,7 +584,7 @@ int kvm_s390_vcpu_store_status(struct kvm_vcpu *vcpu, unsigned long addr)
 	 * it into the save area
 	 */
 	save_fp_regs(&vcpu->arch.guest_fpregs);
-	save_access_regs(vcpu->run->s.regs.acrs);
+	save_access_regs(vcpu->arch.guest_acrs);
 
 	if (__guestcopy(vcpu, addr + offsetof(struct save_area, fp_regs),
 			vcpu->arch.guest_fpregs.fprs, 128, prefix))

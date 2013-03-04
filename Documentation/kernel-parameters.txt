@@ -1774,11 +1774,6 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
 			processor.  RDRAND is still available to user
 			space applications.
 
-	nordrand	[X86] Disable the direct use of the RDRAND
-			instruction even if it is supported by the
-			processor.  RDRAND is still available to user
-			space applications.
-
 	noresume	[SWSUSP] Disables resume and restores original swap
 			space.
 
