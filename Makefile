@@ -356,12 +356,12 @@ CC		= $(srctree)/scripts/gcc-wrapper.py $(REAL_CC)
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-MODFLAGS	= -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math  -fsingle-precision-constant -mtune=cortex-a9 -marm -march=armv7-a -mfpu=neon-vfpv4 -ftree-vectorize -funswitch-loops 
+MODFLAGS	= -DMODULE -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math  -fsingle-precision-constant -mtune=cortex-a15 -marm -march=armv7-a -mfpu=neon-vfpv4 -ftree-vectorize -funswitch-loops -pipe
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math  -fsingle-precision-constant -mtune=cortex-a9 -marm -march=armv7-a -mfpu=neon-vfpv4 -ftree-vectorize -funswitch-loops
-AFLAGS_KERNEL 	= -fgcse -fsingle-precision-constant -mtune=cortex-a9 -march=armv7-a -mfpu=neon -ftree-vectorize
+CFLAGS_KERNEL	= -fgcse-lm -fgcse-sm -fsched-spec-load -fforce-addr -ffast-math  -fsingle-precision-constant -mtune=cortex-a15 -marm -march=armv7-a -mfpu=neon-vfpv4 -ftree-vectorize -funswitch-loops -pipe
+AFLAGS_KERNEL 	= -fgcse -fsingle-precision-constant -mtune=cortex-a15 -march=armv7-a -mfpu=neon -ftree-vectorize -pipe
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -378,7 +378,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks  	   
+		   -fno-delete-null-pointer-checks 	   
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL := 
 KBUILD_AFLAGS := -D__ASSEMBLY__
