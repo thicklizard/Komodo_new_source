@@ -230,6 +230,9 @@ void cpu_idle(void)
 		idle_notifier_call_chain(IDLE_START);
 		while (!need_resched()) {
 			local_irq_disable();
+#ifdef CONFIG_PL310_ERRATA_769419
+			wmb();
+#endif
 			if (hlt_counter) {
 				local_irq_enable();
 				cpu_relax();
