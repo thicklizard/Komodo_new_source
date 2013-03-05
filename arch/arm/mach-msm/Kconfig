@@ -2378,7 +2378,7 @@ config MSM_CPU_MAX_FSB
 	bool "CPU Max FSB"
 	default n
 	help
-	To support the Max FSB of 533.
+	To support the Max FSB of 667.
 
 config MSM_CPU_MAX_CLK_2DOT1GHZ
 	bool "CPU Max 2.1Ghz clk support"
@@ -2392,11 +2392,11 @@ config MSM_CPU_MAX_CLK_1DOT89GHZ
 	help
 	To support the Max 1.89Ghz.
 
-config MSM_CPU_MAX_CLK_1DOT7GHZ
-	bool "CPU Max 1.7ghz clk support"
+config MSM_CPU_MAX_CLK_1DOT8GHZ
+	bool "CPU Max 1.8ghz clk support"
 	default n
 	help
-	To support the Max 1.7Ghz.
+	To support the Max 1.8Ghz.
 
 config MSM_CPU_MAX_CLK_1DOT5GHZ
 	bool "CPU Max 1.5Ghz clk support"
